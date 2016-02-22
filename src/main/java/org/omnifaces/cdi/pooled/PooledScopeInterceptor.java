@@ -1,6 +1,6 @@
 package org.omnifaces.cdi.pooled;
 
-import static javax.interceptor.Interceptor.Priority.LIBRARY_BEFORE;
+import static javax.interceptor.Interceptor.Priority.PLATFORM_BEFORE;
 
 import javax.annotation.Priority;
 import javax.enterprise.inject.spi.BeanManager;
@@ -10,7 +10,7 @@ import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
 @Interceptor
-@Priority(LIBRARY_BEFORE + 42)
+@Priority(PLATFORM_BEFORE)
 @PooledScopeEnabled
 public class PooledScopeInterceptor {
 
@@ -19,7 +19,13 @@ public class PooledScopeInterceptor {
 
 	@AroundInvoke
 	public Object submitAsync(InvocationContext ctx) throws Exception {
-		// TODO implement
-		return ctx.proceed();
+		PooledContext context = (PooledContext) beanManager.getContext(Pooled.class);
+
+		context.pushNewScope();
+		try {
+			return ctx.proceed();
+		} finally {
+			context.popScope();
+		}
 	}
 }
