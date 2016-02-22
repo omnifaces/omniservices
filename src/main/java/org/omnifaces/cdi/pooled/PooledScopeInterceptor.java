@@ -18,7 +18,7 @@ public class PooledScopeInterceptor {
 	private BeanManager beanManager;
 
 	@AroundInvoke
-	public Object submitAsync(InvocationContext ctx) throws Exception {
+	public Object aroundInvoke(InvocationContext ctx) throws Exception {
 		PooledContext context = (PooledContext) beanManager.getContext(Pooled.class);
 
 		context.pushNewScope();
