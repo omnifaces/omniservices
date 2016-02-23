@@ -3,16 +3,18 @@ package org.omnifaces.cdi.pooled;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+
+import javassist.util.proxy.Proxy;
+import javassist.util.proxy.ProxyFactory;
 
 public class PooledContext implements Context {
 
-	private final ThreadLocal<AtomicReference<PooledScope>> activeScope = ThreadLocal.withInitial(AtomicReference::new);
-
+	private final Map<Contextual<?>, Class<?>> proxyClasses = new ConcurrentHashMap<>();
 	private final Map<Contextual<?>, InstancePool<?>> instancePools = new ConcurrentHashMap<>();
 
 	@Override
@@ -22,31 +24,38 @@ public class PooledContext implements Context {
 
 	@Override
 	public <T> T get(Contextual<T> contextual, CreationalContext<T> creationalContext) {
-		PooledScope pooledScope = activeScope.get().get();
+		if (contextual instanceof Bean) {
 
-		PoolKey<T> poolKey = pooledScope.getPoolKey(contextual);
+			try {
+				Class<T> proxyClass = ((Class<T>) proxyClasses.computeIfAbsent(contextual, ctx -> {
+					ProxyFactory factory = new ProxyFactory();
 
-		if (poolKey == null) {
-			poolKey = ((InstancePool<T>)instancePools.computeIfAbsent(contextual, InstancePool::new)).allocateInstance();
-			pooledScope.setCurrentPoolKey(poolKey);
+					Class<?> beanClass = ((Bean<?>) contextual).getBeanClass();
+
+					factory.setSuperclass(beanClass);
+
+					return factory.createClass();
+				}));
+
+				T instance = proxyClass.newInstance();
+
+				((Proxy) instance).setHandler(new WrappedBeanMethodHandler<>(contextual, creationalContext, this));
+
+				return instance;
+			} catch (InstantiationException | IllegalAccessException e) {
+				// TODO add custom exception type
+				throw new RuntimeException(e);
+			}
 		}
 
-
-		return ((InstancePool<T>) instancePools.get(contextual)).getInstance(poolKey, creationalContext);
+		// TODO add clear error message and pick better exception
+		throw new IllegalArgumentException();
 	}
 
 	@Override
 	public <T> T get(Contextual<T> contextual) {
-		PooledScope pooledScope = activeScope.get().get();
-
-		PoolKey<T> poolKey = pooledScope.getPoolKey(contextual);
-
-		if (poolKey == null) {
-			// TODO check spec if this is correct behaviour or if we should try to allocate an existing bean anyway
-			return null;
-		}
-
-		return ((InstancePool<T>) instancePools.get(contextual)).getInstance(poolKey);
+		// TODO return an available existing proxy in the current thread
+		return null;
 	}
 
 	@Override
@@ -54,12 +63,15 @@ public class PooledContext implements Context {
 		return true;
 	}
 
-	public void pushNewScope() {
-		activeScope.get().getAndUpdate(PooledScope::newPooledScope);
+	public <T> PoolKey<T> allocateBean(Contextual<T> contextual) {
+		return ((InstancePool<T>) instancePools.computeIfAbsent(contextual, InstancePool::new)).allocateInstance();
 	}
 
-	public void popScope() {
-		activeScope.get().getAndUpdate(PooledScope::cleanCurrentScope);
+	public <T> void releaseBean(PoolKey<T> poolKey) {
+		((InstancePool<T>) instancePools.get(poolKey.getContextual())).releaseInstance(poolKey);
 	}
 
+	public <T> T getBean(PoolKey<T> poolKey, CreationalContext<T> creationalContext) {
+		return ((InstancePool<T>) instancePools.get(poolKey.getContextual())).getInstance(poolKey, creationalContext);
+	}
 }
