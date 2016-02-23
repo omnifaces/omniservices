@@ -27,7 +27,7 @@ public class PooledContext implements Context {
 		PoolKey<T> poolKey = pooledScope.getPoolKey(contextual);
 
 		if (poolKey == null) {
-			poolKey = ((InstancePool<T>)instancePools.get(contextual)).allocateInstance();
+			poolKey = ((InstancePool<T>)instancePools.computeIfAbsent(contextual, InstancePool::new)).allocateInstance();
 			pooledScope.setCurrentPoolKey(poolKey);
 		}
 
