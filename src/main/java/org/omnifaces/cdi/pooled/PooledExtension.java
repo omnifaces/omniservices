@@ -7,7 +7,6 @@ import javax.enterprise.inject.spi.Extension;
 
 public class PooledExtension implements Extension {
 
-
 	public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery beforeBeanDiscovery) {
 		beforeBeanDiscovery.addScope(Pooled.class, true, false);
 	}

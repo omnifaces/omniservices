@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import javax.enterprise.context.spi.Contextual;
 
-public final class PoolKey<T> {
+final class PoolKey<T> {
 
 	private final Contextual<T> contextual;
 	private final int index;

@@ -7,7 +7,7 @@ import javax.enterprise.context.spi.CreationalContext;
 
 import javassist.util.proxy.MethodHandler;
 
-public class PooledInstanceMethodHandler<T> implements MethodHandler {
+class PooledInstanceMethodHandler<T> implements MethodHandler {
 
 	private final Contextual<T> contextual;
 
@@ -21,15 +21,14 @@ public class PooledInstanceMethodHandler<T> implements MethodHandler {
 		this.pooledContext = pooledContext;
 	}
 
-
 	@Override
-	public Object invoke(Object o, Method method, Method method1, Object[] objects) throws Throwable {
+	public Object invoke(Object proxy, Method overriddenMethod, Method forwarderMethod, Object[] arguments) throws Throwable {
 		PoolKey<T> poolKey = pooledContext.allocateBean(contextual);
 
 		try {
 			T bean = pooledContext.getBean(poolKey, context);
 
-			return method.invoke(bean, objects);
+			return overriddenMethod.invoke(bean, arguments);
 		}
 		finally {
 			pooledContext.releaseBean(poolKey);
