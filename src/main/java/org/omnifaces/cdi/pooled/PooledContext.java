@@ -39,7 +39,7 @@ public class PooledContext implements Context {
 
 				T instance = proxyClass.newInstance();
 
-				((Proxy) instance).setHandler(new WrappedBeanMethodHandler<>(contextual, creationalContext, this));
+				((Proxy) instance).setHandler(new PooledInstanceMethodHandler<>(contextual, creationalContext, this));
 
 				return instance;
 			} catch (InstantiationException | IllegalAccessException e) {

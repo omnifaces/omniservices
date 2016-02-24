@@ -7,7 +7,7 @@ import javax.enterprise.context.spi.CreationalContext;
 
 import javassist.util.proxy.MethodHandler;
 
-public class WrappedBeanMethodHandler<T> implements MethodHandler {
+public class PooledInstanceMethodHandler<T> implements MethodHandler {
 
 	private final Contextual<T> contextual;
 
@@ -15,7 +15,7 @@ public class WrappedBeanMethodHandler<T> implements MethodHandler {
 
 	private final PooledContext pooledContext;
 
-	public WrappedBeanMethodHandler(Contextual<T> contextual, CreationalContext<T> context, PooledContext pooledContext) {
+	public PooledInstanceMethodHandler(Contextual<T> contextual, CreationalContext<T> context, PooledContext pooledContext) {
 		this.contextual = contextual;
 		this.context = context;
 		this.pooledContext = pooledContext;
