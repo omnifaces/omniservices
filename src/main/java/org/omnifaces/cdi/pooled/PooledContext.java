@@ -2,9 +2,9 @@ package org.omnifaces.cdi.pooled;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
-import java.util.Queue;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.IntStream;
 
 import javax.enterprise.context.spi.Context;
@@ -88,7 +88,7 @@ public class PooledContext implements Context {
 
 		private final Contextual<T> contextual;
 		private final Map<PoolKey<T>, T> instances = new ConcurrentHashMap<>();
-		private final Queue<PoolKey<T>> freeInstanceKeys = new ConcurrentLinkedQueue<>();
+		private final BlockingDeque<PoolKey<T>> freeInstanceKeys = new LinkedBlockingDeque<>();
 
 		public InstancePool(Contextual<T> contextual) {
 			this.contextual = contextual;
@@ -115,7 +115,11 @@ public class PooledContext implements Context {
 		}
 
 		public PoolKey<T> allocateInstance() {
-			return freeInstanceKeys.remove();
+			try {
+				return freeInstanceKeys.takeFirst();
+			} catch (InterruptedException e) {
+				throw new UncheckedInterruptedException(e);
+			}
 		}
 
 		public void releaseInstance(PoolKey<T> key) {
@@ -123,7 +127,7 @@ public class PooledContext implements Context {
 				throw new IllegalArgumentException();
 			}
 
-			freeInstanceKeys.add(key);
+			freeInstanceKeys.addFirst(key);
 		}
 	}
 }
