@@ -12,118 +12,97 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
-import javassist.util.proxy.Proxy;
-import javassist.util.proxy.ProxyFactory;
-
 public class PooledContext implements Context {
 
-	private final Map<Contextual<?>, Class<?>> proxyClasses = new ConcurrentHashMap<>();
-	private final Map<Contextual<?>, InstancePool<?>> instancePools = new ConcurrentHashMap<>();
+        private final Map<Contextual<?>, Class<?>> proxyClasses = new ConcurrentHashMap<>();
+        private final Map<Contextual<?>, InstancePool<?>> instancePools = new ConcurrentHashMap<>();
+        public final ThreadLocal<PoolKey<?>> threadPoolKey = new ThreadLocal<>();
 
-	@Override
-	public Class<? extends Annotation> getScope() {
-		return Pooled.class;
-	}
+        @Override
+        public Class<? extends Annotation> getScope() {
+                return Pooled.class;
+        }
 
-	@Override
-	public <T> T get(Contextual<T> contextual, CreationalContext<T> creationalContext) {
-		if (contextual instanceof Bean) {
+        @Override
+        public <T> T get(Contextual<T> contextual, CreationalContext<T> creationalContext) {
+                if (contextual instanceof Bean) {
+                        PoolKey<T> poolKey = allocateBean(contextual);
+                        threadPoolKey.set(poolKey);
+                        return getBean(poolKey, creationalContext);
+                }
 
-			try {
-				@SuppressWarnings("unchecked")
-				Class<T> proxyClass = ((Class<T>) proxyClasses.computeIfAbsent(contextual, ctx -> {
-					ProxyFactory factory = new ProxyFactory();
+                // TODO add clear error message and pick better exception
+                throw new IllegalArgumentException();
+        }
 
-					Class<?> beanClass = ((Bean<?>) contextual).getBeanClass();
+        @Override
+        public <T> T get(Contextual<T> contextual) {
+                // TODO return an available existing proxy in the current thread
+                return null;
+        }
 
-					factory.setSuperclass(beanClass);
+        @Override
+        public boolean isActive() {
+                return true;
+        }
 
-					return factory.createClass();
-				}));
+        @SuppressWarnings("unchecked")
+        public <T> PoolKey<T> allocateBean(Contextual<T> contextual) {
+                return ((InstancePool<T>) instancePools.computeIfAbsent(contextual, InstancePool::new)).allocateInstance();
+        }
 
-				T instance = proxyClass.newInstance();
+        @SuppressWarnings("unchecked")
+        public <T> void releaseBean(PoolKey<T> poolKey) {
+                ((InstancePool<T>) instancePools.get(poolKey.getContextual())).releaseInstance(poolKey);
+        }
 
-				((Proxy) instance).setHandler(new PooledInstanceMethodHandler<>(contextual, creationalContext, this));
+        @SuppressWarnings("unchecked")
+        public <T> T getBean(PoolKey<T> poolKey, CreationalContext<T> creationalContext) {
+                return ((InstancePool<T>) instancePools.get(poolKey.getContextual())).getInstance(poolKey, creationalContext);
+        }
 
-				return instance;
-			} catch (InstantiationException | IllegalAccessException e) {
-				// TODO add custom exception type
-				throw new RuntimeException(e);
-			}
-		}
+        static class InstancePool<T> {
 
-		// TODO add clear error message and pick better exception
-		throw new IllegalArgumentException();
-	}
+                private static final int MAX_NUMBER_OF_INSTANCES = 10;
 
-	@Override
-	public <T> T get(Contextual<T> contextual) {
-		// TODO return an available existing proxy in the current thread
-		return null;
-	}
+                private final Contextual<T> contextual;
+                private final Map<PoolKey<T>, T> instances = new ConcurrentHashMap<>();
+                private final Queue<PoolKey<T>> freeInstanceKeys = new ConcurrentLinkedQueue<>();
 
-	@Override
-	public boolean isActive() {
-		return true;
-	}
+                public InstancePool(Contextual<T> contextual) {
+                        this.contextual = contextual;
 
-	@SuppressWarnings("unchecked")
-	public <T> PoolKey<T> allocateBean(Contextual<T> contextual) {
-		return ((InstancePool<T>) instancePools.computeIfAbsent(contextual, InstancePool::new)).allocateInstance();
-	}
+                        IntStream.range(0, MAX_NUMBER_OF_INSTANCES)
+                                .mapToObj(i -> new PoolKey<>(contextual, i))
+                                .forEach(freeInstanceKeys::add);
+                }
 
-	@SuppressWarnings("unchecked")
-	public <T> void releaseBean(PoolKey<T> poolKey) {
-		((InstancePool<T>) instancePools.get(poolKey.getContextual())).releaseInstance(poolKey);
-	}
+                public T getInstance(PoolKey<T> poolKey) {
+                        if (!poolKey.getContextual().equals(contextual)) {
+                                throw new IllegalArgumentException();
+                        }
 
-	@SuppressWarnings("unchecked")
-	public <T> T getBean(PoolKey<T> poolKey, CreationalContext<T> creationalContext) {
-		return ((InstancePool<T>) instancePools.get(poolKey.getContextual())).getInstance(poolKey, creationalContext);
-	}
+                        return instances.get(poolKey);
+                }
 
-	static class InstancePool<T> {
+                public T getInstance(PoolKey<T> poolKey, CreationalContext<T> context) {
+                        if (!poolKey.getContextual().equals(contextual)) {
+                                throw new IllegalArgumentException();
+                        }
 
-		private static final int MAX_NUMBER_OF_INSTANCES = 10;
+                        return instances.computeIfAbsent(poolKey, key -> contextual.create(context));
+                }
 
-		private final Contextual<T> contextual;
-		private final Map<PoolKey<T>, T> instances = new ConcurrentHashMap<>();
-		private final Queue<PoolKey<T>> freeInstanceKeys = new ConcurrentLinkedQueue<>();
+                public PoolKey<T> allocateInstance() {
+                        return freeInstanceKeys.remove();
+                }
 
-		public InstancePool(Contextual<T> contextual) {
-			this.contextual = contextual;
+                public void releaseInstance(PoolKey<T> key) {
+                        if (!contextual.equals(key.getContextual())) {
+                                throw new IllegalArgumentException();
+                        }
 
-			IntStream.range(0, MAX_NUMBER_OF_INSTANCES)
-			         .mapToObj(i -> new PoolKey<>(contextual, i))
-			         .forEach(freeInstanceKeys::add);
-		}
-
-		public T getInstance(PoolKey<T> poolKey) {
-			if (!poolKey.getContextual().equals(contextual)) {
-				throw new IllegalArgumentException();
-			}
-
-			return instances.get(poolKey);
-		}
-
-		public T getInstance(PoolKey<T> poolKey, CreationalContext<T> context) {
-			if (!poolKey.getContextual().equals(contextual)) {
-				throw new IllegalArgumentException();
-			}
-
-			return instances.computeIfAbsent(poolKey, key -> contextual.create(context));
-		}
-
-		public PoolKey<T> allocateInstance() {
-			return freeInstanceKeys.remove();
-		}
-
-		public void releaseInstance(PoolKey<T> key) {
-			if (!contextual.equals(key.getContextual())) {
-				throw new IllegalArgumentException();
-			}
-
-			freeInstanceKeys.add(key);
-		}
-	}
+                        freeInstanceKeys.add(key);
+                }
+        }
 }
