@@ -12,7 +12,6 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
-
 public class PooledContext implements Context {
 
     private final Map<Contextual<?>, Class<?>> proxyClasses = new ConcurrentHashMap<>();
