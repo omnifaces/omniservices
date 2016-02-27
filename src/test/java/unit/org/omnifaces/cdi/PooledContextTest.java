@@ -19,7 +19,7 @@ public class PooledContextTest {
     @Test
     public void hello() {
         MainPooledBean mainBean = beanInstance.get();
-        assertThat(mainBean.callChildBean(), is(equalTo("MainPooledBean 1, child: NestedPooledBean 1")));
+        assertThat(mainBean.callChildBean(), is(equalTo("MainPooledBean 1, child: NestedPooledBean 1, NestedPooledBean 2")));
     }
     
     @Pooled
