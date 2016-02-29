@@ -12,13 +12,11 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
-import javassist.util.proxy.Proxy;
-import javassist.util.proxy.ProxyFactory;
-
 public class PooledContext implements Context {
 
 	private final Map<Contextual<?>, Class<?>> proxyClasses = new ConcurrentHashMap<>();
 	private final Map<Contextual<?>, InstancePool<?>> instancePools = new ConcurrentHashMap<>();
+	public final ThreadLocal<PoolKey<?>> threadPoolKey = new ThreadLocal<>();
 
 	@Override
 	public Class<? extends Annotation> getScope() {
@@ -28,28 +26,9 @@ public class PooledContext implements Context {
 	@Override
 	public <T> T get(Contextual<T> contextual, CreationalContext<T> creationalContext) {
 		if (contextual instanceof Bean) {
-
-			try {
-				@SuppressWarnings("unchecked")
-				Class<T> proxyClass = ((Class<T>) proxyClasses.computeIfAbsent(contextual, ctx -> {
-					ProxyFactory factory = new ProxyFactory();
-
-					Class<?> beanClass = ((Bean<?>) contextual).getBeanClass();
-
-					factory.setSuperclass(beanClass);
-
-					return factory.createClass();
-				}));
-
-				T instance = proxyClass.newInstance();
-
-				((Proxy) instance).setHandler(new PooledInstanceMethodHandler<>(contextual, creationalContext, this));
-
-				return instance;
-			} catch (InstantiationException | IllegalAccessException e) {
-				// TODO add custom exception type
-				throw new RuntimeException(e);
-			}
+			PoolKey<T> poolKey = allocateBean(contextual);
+			threadPoolKey.set(poolKey);
+			return getBean(poolKey, creationalContext);
 		}
 
 		// TODO add clear error message and pick better exception
@@ -94,8 +73,8 @@ public class PooledContext implements Context {
 			this.contextual = contextual;
 
 			IntStream.range(0, MAX_NUMBER_OF_INSTANCES)
-			         .mapToObj(i -> new PoolKey<>(contextual, i))
-			         .forEach(freeInstanceKeys::add);
+				.mapToObj(i -> new PoolKey<>(contextual, i))
+				.forEach(freeInstanceKeys::add);
 		}
 
 		public T getInstance(PoolKey<T> poolKey) {
