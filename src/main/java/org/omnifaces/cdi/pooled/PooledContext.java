@@ -12,13 +12,15 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
-import javassist.util.proxy.Proxy;
-import javassist.util.proxy.ProxyFactory;
-
 public class PooledContext implements Context {
 
+	private final ThreadLocal<PooledScope> poolScope = ThreadLocal.withInitial(PooledScope::new);
 	private final Map<Contextual<?>, Class<?>> proxyClasses = new ConcurrentHashMap<>();
 	private final Map<Contextual<?>, InstancePool<?>> instancePools = new ConcurrentHashMap<>();
+
+	// TODO would prefer some kind of two-way map for this
+	private final Map<Contextual<?>, Object> dummyInstances = new ConcurrentHashMap<>();
+	private final Map<Object, Bean<?>> beansByDummyInstance = new ConcurrentHashMap<>();
 
 	@Override
 	public Class<? extends Annotation> getScope() {
@@ -28,28 +30,13 @@ public class PooledContext implements Context {
 	@Override
 	public <T> T get(Contextual<T> contextual, CreationalContext<T> creationalContext) {
 		if (contextual instanceof Bean) {
+			PoolKey<T> poolKey = poolScope.get().getPoolKey(contextual);
 
-			try {
-				@SuppressWarnings("unchecked")
-				Class<T> proxyClass = ((Class<T>) proxyClasses.computeIfAbsent(contextual, ctx -> {
-					ProxyFactory factory = new ProxyFactory();
-
-					Class<?> beanClass = ((Bean<?>) contextual).getBeanClass();
-
-					factory.setSuperclass(beanClass);
-
-					return factory.createClass();
-				}));
-
-				T instance = proxyClass.newInstance();
-
-				((Proxy) instance).setHandler(new PooledInstanceMethodHandler<>(contextual, creationalContext, this));
-
-				return instance;
-			} catch (InstantiationException | IllegalAccessException e) {
-				// TODO add custom exception type
-				throw new RuntimeException(e);
+			if (poolKey == null) {
+				return getDummyInstance((Bean<T>) contextual);
 			}
+
+			return ((InstancePool<T>)instancePools.get(poolKey.getContextual())).getInstance(poolKey, creationalContext);
 		}
 
 		// TODO add clear error message and pick better exception
@@ -58,7 +45,15 @@ public class PooledContext implements Context {
 
 	@Override
 	public <T> T get(Contextual<T> contextual) {
-		// TODO return an available existing proxy in the current thread
+		if (contextual instanceof Bean) {
+			PoolKey<T> poolKey = poolScope.get().getPoolKey(contextual);
+
+			if (poolKey == null) {
+				return (T) dummyInstances.get(contextual);
+			}
+
+			return ((InstancePool<T>)instancePools.get(poolKey.getContextual())).getInstance(poolKey);
+		}
 		return null;
 	}
 
@@ -68,18 +63,42 @@ public class PooledContext implements Context {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> PoolKey<T> allocateBean(Contextual<T> contextual) {
+	<T> PoolKey<T> allocateBean(Contextual<T> contextual) {
 		return ((InstancePool<T>) instancePools.computeIfAbsent(contextual, InstancePool::new)).allocateInstance();
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> void releaseBean(PoolKey<T> poolKey) {
+	<T> void releaseBean(PoolKey<T> poolKey) {
 		((InstancePool<T>) instancePools.get(poolKey.getContextual())).releaseInstance(poolKey);
+	}
+
+	private <T> T getDummyInstance(Bean<T> contextual) {
+		return (T) dummyInstances.computeIfAbsent(contextual, contextual1 -> {
+			try {
+				Object dummyInstance = contextual.getBeanClass().newInstance();
+
+				beansByDummyInstance.putIfAbsent(dummyInstance, contextual);
+
+				return dummyInstance;
+			}
+			catch (InstantiationException |IllegalAccessException e) {
+				// TODO add custom exception type
+				throw new RuntimeException(e);
+			}
+		});
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T getBean(PoolKey<T> poolKey, CreationalContext<T> creationalContext) {
 		return ((InstancePool<T>) instancePools.get(poolKey.getContextual())).getInstance(poolKey, creationalContext);
+	}
+
+	boolean isDummy(Object target) {
+		return beansByDummyInstance.containsKey(dummyInstances);
+	}
+
+	Bean<?> getBeanByDummyInstance(Object target) {
+		return beansByDummyInstance.get(target);
 	}
 
 	static class InstancePool<T> {
