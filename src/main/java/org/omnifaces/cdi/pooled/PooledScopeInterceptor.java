@@ -31,14 +31,14 @@ public class PooledScopeInterceptor {
 		try {
 			Object target = ctx.getTarget();
 
-				// The current interceptor is on a dummy instance, now we're in an active PooledScope, we can use a "real" instance from the pool
+			// The current interceptor is on a dummy instance, now we're in an active PooledScope, we can use a "real" instance from the pool
 
-				Bean<?> bean = beanManager.getBeans(target.getClass()).stream().findFirst().get();
+			Bean<?> bean = beanManager.getBeans(target.getClass()).stream().findFirst().get();
 
-				CreationalContext<?> creationalContext = beanManager.createCreationalContext(bean);
-				Object reference = beanManager.getReference(bean, target.getClass(), creationalContext);
+			CreationalContext<?> creationalContext = beanManager.createCreationalContext(bean);
+			Object reference = beanManager.getReference(bean, target.getClass(), creationalContext);
 
-				return ctx.getMethod().invoke(reference, ctx.getParameters());
+			return ctx.getMethod().invoke(reference, ctx.getParameters());
 		} finally {
 			context.endPooledScope();
 		}
