@@ -23,24 +23,24 @@ public class PooledScopeInterceptor {
 	public Object aroundInvoke(InvocationContext ctx) throws Exception {
 		PooledContext context = (PooledContext) beanManager.getContext(Pooled.class);
 
-		Object target = ctx.getTarget();
-		if (!context.isDummy(target)) {
+		if (context.isPooledScopeActive()) {
 			return ctx.proceed();
 		}
 
-		Bean<?> contextual = context.getBeanByDummyInstance(target);
-		PoolKey<?> poolKey = context.allocateBean(contextual);
-
+		context.startPooledScope();
 		try {
-			CreationalContext<?> creationalContext = beanManager.createCreationalContext(contextual);
-			Object reference = beanManager.getReference(contextual, target.getClass(), creationalContext);
+			Object target = ctx.getTarget();
 
-			ctx.getMethod().invoke(reference, ctx.getParameters());
-		}
-		finally {
-			context.releaseBean(poolKey);
-		}
+				// The current interceptor is on a dummy instance, now we're in an active PooledScope, we can use a "real" instance from the pool
 
-		return null;
+				Bean<?> bean = beanManager.getBeans(target.getClass()).stream().findFirst().get();
+
+				CreationalContext<?> creationalContext = beanManager.createCreationalContext(bean);
+				Object reference = beanManager.getReference(bean, target.getClass(), creationalContext);
+
+				return ctx.getMethod().invoke(reference, ctx.getParameters());
+		} finally {
+			context.endPooledScope();
+		}
 	}
 }
