@@ -35,7 +35,7 @@ public class PooledContext implements Context {
 				return (T) dummyInstances.computeIfAbsent(contextual, ctx -> contextual.create(creationalContext));
 			}
 
-			return ((InstancePool<T>)instancePools.get(poolKey.getContextual())).getInstance(poolKey, creationalContext);
+			return ((InstancePool<T>) instancePools.get(poolKey.getContextual())).getInstance(poolKey, creationalContext);
 		}
 
 		// TODO add clear error message and pick better exception
@@ -52,7 +52,7 @@ public class PooledContext implements Context {
 				return (T) dummyInstances.get(contextual);
 			}
 
-			return ((InstancePool<T>)instancePools.get(poolKey.getContextual())).getInstance(poolKey);
+			return ((InstancePool<T>) instancePools.get(poolKey.getContextual())).getInstance(poolKey);
 		}
 		return null;
 	}
@@ -64,7 +64,7 @@ public class PooledContext implements Context {
 
 	@SuppressWarnings("unchecked")
 	<T> PoolKey<T> allocateBean(Contextual<T> contextual) {
-		PoolKey<T> poolKey = ((InstancePool<T>) instancePools.computeIfAbsent(contextual, InstancePool::new)).allocateInstance();
+		PoolKey<T> poolKey = ((InstancePool<T>) instancePools.get(contextual)).allocateInstance();
 
 		poolScope.get().setPoolKey(poolKey);
 
@@ -82,18 +82,23 @@ public class PooledContext implements Context {
 		return poolScope.get().getPoolKey(bean) != null;
 	}
 
+	<T> void createInstancePool(Contextual<T> contextual, Pooled poolSettings) {
+		instancePools.put(contextual, new InstancePool<>(contextual, poolSettings));
+	}
+
 	static class InstancePool<T> {
 
-		private static final int MAX_NUMBER_OF_INSTANCES = 10;
-
 		private final Contextual<T> contextual;
+		private final Pooled poolSettings;
+
 		private final Map<PoolKey<T>, T> instances = new ConcurrentHashMap<>();
 		private final BlockingDeque<PoolKey<T>> freeInstanceKeys = new LinkedBlockingDeque<>();
 
-		public InstancePool(Contextual<T> contextual) {
+		public InstancePool(Contextual<T> contextual, Pooled poolSettings) {
 			this.contextual = contextual;
+			this.poolSettings = poolSettings;
 
-			IntStream.range(0, MAX_NUMBER_OF_INSTANCES)
+			IntStream.range(0, poolSettings.maxNumberOfInstances())
 			         .mapToObj(i -> new PoolKey<>(contextual, i))
 			         .forEach(freeInstanceKeys::add);
 		}
@@ -116,7 +121,14 @@ public class PooledContext implements Context {
 
 		public PoolKey<T> allocateInstance() {
 			try {
-				return freeInstanceKeys.takeFirst();
+				PoolKey<T> poolKey = freeInstanceKeys.poll(poolSettings.instanceLockTimeout(), poolSettings.instanceLockTimeoutUnit());
+
+				if (poolKey == null) {
+					// Unable to allocate an instance within the configured timeout
+					throw new PoolLockTimeoutException();
+				}
+
+				return poolKey;
 			} catch (InterruptedException e) {
 				throw new UncheckedInterruptedException(e);
 			}
