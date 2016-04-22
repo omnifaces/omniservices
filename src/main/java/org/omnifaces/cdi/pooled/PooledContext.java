@@ -86,7 +86,7 @@ public class PooledContext implements Context {
 		instancePools.put(contextual, new InstancePool<>(contextual, poolSettings));
 	}
 
-	static class InstancePool<T> {
+	private static class InstancePool<T> {
 
 		private final Contextual<T> contextual;
 		private final Pooled poolSettings;
@@ -94,7 +94,7 @@ public class PooledContext implements Context {
 		private final Map<PoolKey<T>, T> instances = new ConcurrentHashMap<>();
 		private final BlockingDeque<PoolKey<T>> freeInstanceKeys = new LinkedBlockingDeque<>();
 
-		public InstancePool(Contextual<T> contextual, Pooled poolSettings) {
+		InstancePool(Contextual<T> contextual, Pooled poolSettings) {
 			this.contextual = contextual;
 			this.poolSettings = poolSettings;
 
@@ -103,7 +103,7 @@ public class PooledContext implements Context {
 			         .forEach(freeInstanceKeys::add);
 		}
 
-		public T getInstance(PoolKey<T> poolKey) {
+		T getInstance(PoolKey<T> poolKey) {
 			if (!poolKey.getContextual().equals(contextual)) {
 				throw new IllegalArgumentException();
 			}
@@ -111,7 +111,7 @@ public class PooledContext implements Context {
 			return instances.get(poolKey);
 		}
 
-		public T getInstance(PoolKey<T> poolKey, CreationalContext<T> context) {
+		T getInstance(PoolKey<T> poolKey, CreationalContext<T> context) {
 			if (!poolKey.getContextual().equals(contextual)) {
 				throw new IllegalArgumentException();
 			}
@@ -119,7 +119,7 @@ public class PooledContext implements Context {
 			return instances.computeIfAbsent(poolKey, key -> contextual.create(context));
 		}
 
-		public PoolKey<T> allocateInstance() {
+		PoolKey<T> allocateInstance() {
 			try {
 				PoolKey<T> poolKey = freeInstanceKeys.poll(poolSettings.instanceLockTimeout(), poolSettings.instanceLockTimeoutUnit());
 
@@ -134,7 +134,7 @@ public class PooledContext implements Context {
 			}
 		}
 
-		public void releaseInstance(PoolKey<T> key) {
+		void releaseInstance(PoolKey<T> key) {
 			if (!contextual.equals(key.getContextual())) {
 				throw new IllegalArgumentException();
 			}
