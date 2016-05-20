@@ -7,17 +7,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.IntStream;
 
-import javax.enterprise.context.spi.Context;
+import javax.enterprise.context.spi.AlterableContext;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
-public class PooledContext implements Context {
+public class PooledContext implements AlterableContext {
 
 	private final ThreadLocal<PooledScope> poolScope = ThreadLocal.withInitial(PooledScope::new);
 	private final Map<Contextual<?>, InstancePool<?>> instancePools = new ConcurrentHashMap<>();
 
-	// TODO would prefer some kind of two-way map for this
 	private final Map<Contextual<?>, Object> dummyInstances = new ConcurrentHashMap<>();
 
 	@Override
@@ -86,12 +85,32 @@ public class PooledContext implements Context {
 		instancePools.put(contextual, new InstancePool<>(contextual, poolSettings));
 	}
 
+	<T> boolean mustDestroyBeanWhenCaught(Contextual<T> contextual, Throwable throwable) {
+		return instancePools.get(contextual).mustDestroyBeanWhenCaught(throwable);
+	}
+
+	@Override
+	public void destroy(Contextual<?> contextual) {
+		PoolKey<?> poolKey = poolScope.get().getPoolKey(contextual);
+
+		if (poolKey != null) {
+			destroyInstance(poolKey);
+		}
+	}
+
+	private <T> void destroyInstance(PoolKey<T> poolKey) {
+		@SuppressWarnings("unchecked")
+		InstancePool<T> instancePool = (InstancePool<T>) instancePools.get(poolKey.getContextual());
+
+		instancePool.destroyInstance(poolKey);
+	}
+
 	private static class InstancePool<T> {
 
 		private final Contextual<T> contextual;
 		private final Pooled poolSettings;
 
-		private final Map<PoolKey<T>, T> instances = new ConcurrentHashMap<>();
+		private final Map<PoolKey<T>, Instance<T>> instances = new ConcurrentHashMap<>();
 		private final BlockingDeque<PoolKey<T>> freeInstanceKeys = new LinkedBlockingDeque<>();
 
 		InstancePool(Contextual<T> contextual, Pooled poolSettings) {
@@ -108,7 +127,13 @@ public class PooledContext implements Context {
 				throw new IllegalArgumentException();
 			}
 
-			return instances.get(poolKey);
+			Instance<T> instance = instances.get(poolKey);
+
+			if (instance != null) {
+				return instance.getInstance();
+			}
+
+			return null;
 		}
 
 		T getInstance(PoolKey<T> poolKey, CreationalContext<T> context) {
@@ -116,7 +141,7 @@ public class PooledContext implements Context {
 				throw new IllegalArgumentException();
 			}
 
-			return instances.computeIfAbsent(poolKey, key -> contextual.create(context));
+			return instances.computeIfAbsent(poolKey, key -> new Instance<>(contextual, context)).getInstance();
 		}
 
 		PoolKey<T> allocateInstance() {
@@ -140,6 +165,55 @@ public class PooledContext implements Context {
 			}
 
 			freeInstanceKeys.addFirst(key);
+		}
+
+		void destroyInstance(PoolKey<T> key) {
+			Instance<T> instance = instances.remove(key);
+
+			instance.destroy(contextual);
+		}
+
+		boolean mustDestroyBeanWhenCaught(Throwable throwable) {
+			for (Class throwableType: poolSettings.dontDestroyOn()) {
+				if (throwableType.isInstance(throwable)) {
+					return false;
+				}
+			}
+
+			if (poolSettings.dontDestroyOn().length > 0 && poolSettings.destroyOn().length == 0) {
+				return true;
+			}
+
+			for (Class throwableType: poolSettings.destroyOn()) {
+				if (throwableType.isInstance(throwable)) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+	}
+
+	private static class Instance<T> {
+
+		private final T instance;
+		private final CreationalContext<T> creationalContext;
+
+		Instance(Contextual<T> contextual, CreationalContext<T> creationalContext) {
+			this.instance = contextual.create(creationalContext);
+			this.creationalContext = creationalContext;
+		}
+
+		T getInstance() {
+			return instance;
+		}
+
+		CreationalContext<T> getCreationalContext() {
+			return creationalContext;
+		}
+
+		void destroy(Contextual<T> contextual) {
+			contextual.destroy(instance, creationalContext);
 		}
 	}
 }

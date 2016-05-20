@@ -2,6 +2,8 @@ package org.omnifaces.cdi.pooled;
 
 import static javax.interceptor.Interceptor.Priority.PLATFORM_BEFORE;
 
+import java.lang.reflect.InvocationTargetException;
+
 import javax.annotation.Priority;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Intercepted;
@@ -25,7 +27,7 @@ public class PooledScopeInterceptor {
 	private Bean<?> interceptedBean;
 
 	@AroundInvoke
-	public Object aroundInvoke(InvocationContext ctx) throws Exception {
+	public Object aroundInvoke(InvocationContext ctx) throws Throwable {
 		PooledContext context = (PooledContext) beanManager.getContext(Pooled.class);
 
 		if (context.hasAllocatedInstanceOf(interceptedBean)) {
@@ -40,8 +42,25 @@ public class PooledScopeInterceptor {
 
 			return ctx.getMethod().invoke(reference, ctx.getParameters());
 		}
+		catch(InvocationTargetException e) {
+			// Any exception thrown by the method will be wrapped due to use of reflection
+			destroyBeanIfNeeded(context, e.getCause());
+
+			throw e.getCause();
+		}
+		catch (Throwable t) {
+			destroyBeanIfNeeded(context, t);
+
+			throw t;
+		}
 		finally {
 			context.releaseBean(poolKey);
+		}
+	}
+
+	private void destroyBeanIfNeeded(PooledContext pooledContext, Throwable throwable) throws Throwable {
+		if (pooledContext.mustDestroyBeanWhenCaught(interceptedBean, throwable)) {
+			pooledContext.destroy(interceptedBean);
 		}
 	}
 }

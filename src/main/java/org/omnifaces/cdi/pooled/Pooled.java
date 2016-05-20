@@ -25,4 +25,8 @@ public @interface Pooled {
 
 	TimeUnit instanceLockTimeoutUnit() default MINUTES;
 
+	Class[] destroyOn() default {};
+
+	Class[] dontDestroyOn() default {};
+
 }
