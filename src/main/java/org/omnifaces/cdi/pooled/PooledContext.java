@@ -12,6 +12,9 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
+/**
+ * The {@link AlterableContext} implementation for {@link Pooled} beans.
+ */
 public class PooledContext implements AlterableContext {
 
 	private final ThreadLocal<PooledScope> poolScope = ThreadLocal.withInitial(PooledScope::new);
