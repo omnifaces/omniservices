@@ -13,7 +13,7 @@ import org.omnifaces.cdi.pooled.Pooled;
 
 @Stereotype
 @Pooled
-@Transactional
+@Transactional(rollbackOn = Throwable.class)
 @Target(TYPE)
 @Retention(RUNTIME)
 public @interface Service {
