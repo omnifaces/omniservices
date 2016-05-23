@@ -40,13 +40,7 @@ public class PooledScopeInterceptor {
 			CreationalContext<?> creationalContext = beanManager.createCreationalContext(interceptedBean);
 			Object reference = beanManager.getReference(interceptedBean, interceptedBean.getBeanClass(), creationalContext);
 
-			return ctx.getMethod().invoke(reference, ctx.getParameters());
-		}
-		catch(InvocationTargetException e) {
-			// Any exception thrown by the method will be wrapped due to use of reflection
-			destroyBeanIfNeeded(context, e.getCause());
-
-			throw e.getCause();
+			return proceedOnInstance(ctx, reference);
 		}
 		catch (Throwable t) {
 			destroyBeanIfNeeded(context, t);
@@ -55,6 +49,15 @@ public class PooledScopeInterceptor {
 		}
 		finally {
 			context.releaseBean(poolKey);
+		}
+	}
+
+	private Object proceedOnInstance(InvocationContext ctx, Object instance) throws Throwable {
+		try {
+			return ctx.getMethod().invoke(instance, ctx.getParameters());
+		}
+		catch(InvocationTargetException e) {
+			throw e.getCause();
 		}
 	}
 
