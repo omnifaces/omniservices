@@ -1,4 +1,4 @@
-package org.omnifaces.cdi.asynchronous;
+package org.omnifaces.services.asynchronous;
 
 import static javax.interceptor.Interceptor.Priority.PLATFORM_BEFORE;
 
@@ -15,12 +15,12 @@ import javax.interceptor.InvocationContext;
 @Asynchronous
 @Priority(PLATFORM_BEFORE)
 public class AsynchronousInterceptor implements Serializable {
- 
+
     private static final long serialVersionUID = 1L;
- 
+
     @Resource
     private ManagedExecutorService managedExecutorService;
- 
+
     @AroundInvoke
     public Object submitAsync(InvocationContext ctx) throws Exception {
         return new FutureDelegator(managedExecutorService.submit( ()-> { return ctx.proceed(); } ));

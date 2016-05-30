@@ -1,4 +1,4 @@
-package org.omnifaces.cdi.pooled;
+package org.omnifaces.services.pooled;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;

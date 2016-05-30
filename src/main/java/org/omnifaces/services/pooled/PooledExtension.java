@@ -1,4 +1,4 @@
-package org.omnifaces.cdi.pooled;
+package org.omnifaces.services.pooled;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
@@ -8,7 +8,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 
-import org.omnifaces.cdi.util.AnnotatedTypeWrapper;
+import org.omnifaces.services.util.AnnotatedTypeWrapper;
 import org.omnifaces.utils.annotation.AnnotationUtils;
 
 public class PooledExtension implements Extension {

@@ -1,4 +1,4 @@
-package org.omnifaces.cdi.asynchronous;
+package org.omnifaces.services.asynchronous;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;

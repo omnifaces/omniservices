@@ -1,4 +1,4 @@
-package org.omnifaces.cdi.util;
+package org.omnifaces.services.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;

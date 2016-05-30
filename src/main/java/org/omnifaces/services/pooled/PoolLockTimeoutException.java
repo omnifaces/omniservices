@@ -1,4 +1,4 @@
-package org.omnifaces.cdi.pooled;
+package org.omnifaces.services.pooled;
 
 public class PoolLockTimeoutException extends RuntimeException {
 

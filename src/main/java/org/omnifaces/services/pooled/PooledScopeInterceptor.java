@@ -1,4 +1,4 @@
-package org.omnifaces.cdi.pooled;
+package org.omnifaces.services.pooled;
 
 import static javax.interceptor.Interceptor.Priority.PLATFORM_BEFORE;
 

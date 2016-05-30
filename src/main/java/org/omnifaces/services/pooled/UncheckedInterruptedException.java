@@ -1,4 +1,4 @@
-package org.omnifaces.cdi.pooled;
+package org.omnifaces.services.pooled;
 
 // TODO move to OmniUtils??
 public class UncheckedInterruptedException extends RuntimeException {
