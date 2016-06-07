@@ -1,0 +1,6 @@
+{
+  "name": "Omniservices",
+  "tagline": "Utility library that provides EJB3-like features for CDI beans",
+  "body": "# OmniServices\r\nUtility library that provides EJB3-like features for CDI beans.\r\n\r\nThis project will attempt to implement CDI and Interceptor based versions of various EJB features and services. Currently the following features are implemented:\r\n\r\n* @Asynchronous - @Asynchronous\r\n* @Stateless - @Pooled\r\n* @Stateless - @Service (stereotype combining @Pooled with @Transactional)\r\n\r\nThe following features are being considered for future versions:\r\n\r\n* @Lock\r\n* @Schedule",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
