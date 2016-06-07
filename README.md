@@ -1,11 +1,13 @@
-# cdi-ejb
-Playground for CDI / Interceptor versions of EJB features
+# OmniServices
+Utility library that provides EJB3-like features for CDI beans
 
-This project will attempt to implement CDI and Interceptor based versions of various EJB features and services, such as:
+This project will attempt to implement CDI and Interceptor based versions of various EJB features and services. Currently the following features are implemented:
 
-* @Asynchronous
+* @Asynchronous - @Asynchronous
+* @Stateless - @Pooled
+* @Stateless - @Service (stereotype combining @Pooled with @Transactional)
+
+The following features are being considered for future versions:
+
 * @Lock
-* @Stateless - @Pooled/@PooledScoped
-* @Stateless - @Monitorable
 * @Schedule
-* @DestroyUponException
