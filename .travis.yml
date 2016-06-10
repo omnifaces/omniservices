@@ -2,6 +2,6 @@ language: java
 jdk:
   - oraclejdk8
 env:
-  - SERVER = glassfish
-  - SERVER = payara
+  - SERVER=glassfish
+  - SERVER=payara
 script: mvn clean package -P $SERVER
