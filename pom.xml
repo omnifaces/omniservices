@@ -240,6 +240,26 @@
 				</dependency>
 			</dependencies>
 		</profile>
+        
+        <profile>
+            <id>payara</id>
+
+            <dependencies>
+	           <dependency>
+	               <groupId>fish.payara.extras</groupId>
+	               <artifactId>payara-embedded-all</artifactId>
+	               <version>4.1.1.162</version>
+	               <scope>test</scope>
+                </dependency>
+                
+                <dependency>
+                    <groupId>org.jboss.arquillian.container</groupId>
+                    <artifactId>arquillian-glassfish-embedded-3.1</artifactId>
+                    <version>1.0.0.CR4</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
 
 		<profile>
 			<id>release</id>
