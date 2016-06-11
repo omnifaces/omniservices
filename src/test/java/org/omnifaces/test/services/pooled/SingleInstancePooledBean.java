@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.omnifaces.services.pooled;
+package org.omnifaces.test.services.pooled;
 
 import java.util.function.Supplier;
+
+import org.omnifaces.services.pooled.Pooled;
 
 @Pooled(destroyOn = RuntimeException.class, dontDestroyOn = IllegalArgumentException.class, maxNumberOfInstances = 1)
 public class SingleInstancePooledBean {

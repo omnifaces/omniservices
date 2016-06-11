@@ -13,38 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.omnifaces.services.pooled;
+package org.omnifaces.test.services.pooled;
 
+import static org.jboss.shrinkwrap.api.ShrinkWrap.create;
+import static org.jboss.shrinkwrap.api.asset.EmptyAsset.INSTANCE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.fail;
 
 import javax.enterprise.inject.spi.Extension;
 import javax.inject.Inject;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.omnifaces.services.util.AnnotatedMethodWrapper;
-import org.omnifaces.services.util.AnnotatedTypeWrapper;
+import org.omnifaces.services.pooled.PooledExtension;
+
 
 @RunWith(Arquillian.class)
 public class PooledTest {
 
 	@Deployment
-	public static JavaArchive createDeployment() {
-		return ShrinkWrap.create(JavaArchive.class)
-		                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-		                 .addClasses(Pooled.class, PooledContext.class, PooledExtension.class, PooledScope.class,
-		                             PooledScopeEnabled.class, PooledScopeInterceptor.class, PoolKey.class,
-		                             PoolLockTimeoutException.class, UncheckedInterruptedException.class,
-		                             AnnotatedMethodWrapper.class, AnnotatedTypeWrapper.class,
-		                             SingleInstancePooledBean.class)
-		                 .addAsServiceProvider(Extension.class, PooledExtension.class);
+	public static Archive<?>  createDeployment() {
+		return create(WebArchive.class)
+                 .addAsManifestResource(INSTANCE, "beans.xml")
+                 .addClasses(SingleInstancePooledBean.class)
+                 .addAsLibraries(create(JavaArchive.class)
+                         .addAsManifestResource(INSTANCE, "beans.xml")
+                         .addAsServiceProvider(Extension.class, PooledExtension.class)
+                         .addPackages(true, "org.omnifaces.services.pooled")
+                         .addPackages(true, "org.omnifaces.services.util")
+                         )
+                 .addAsLibraries(Maven.resolver()
+                         .loadPomFromFile("pom.xml")
+                         .resolve("org.omnifaces:omniutils")
+                         .withoutTransitivity()
+                         .asSingleFile());
 	}
 
 	@Inject
