@@ -5,4 +5,5 @@ env:
   - SERVER=payara
   - SERVER=wildfly
   - SERVER=glassfish
+  - SERVER=tomee
 script: mvn clean package -P $SERVER
