@@ -6,4 +6,5 @@ env:
   - SERVER=wildfly
   - SERVER=glassfish
   - SERVER=tomee
+  - SERVER=liberty
 script: mvn clean package -P $SERVER
