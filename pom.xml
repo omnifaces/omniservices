@@ -12,12 +12,12 @@
 
 	<name>OmniServices</name>
     <url>http://omnifaces.org</url>
-	
+
     <description>
         Utility library that provides EJB3-like features for CDI beans
     </description>
 
-	
+
 	<organization>
 		<name>OmniFaces</name>
 		<url>http://omnifaces.org</url>
@@ -50,7 +50,9 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-        
+
+		<jacoco.version>0.7.4.201502262128</jacoco.version>
+
         <!-- Test servers -->
         <glassfish.version>4.1.1</glassfish.version>
         <payara.version>4.1.1.162</payara.version>
@@ -111,7 +113,7 @@
 			<artifactId>arquillian-junit-container</artifactId>
 			<scope>test</scope>
 		</dependency>
-        
+
         <dependency>
             <groupId>org.jboss.shrinkwrap.resolver</groupId>
             <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
@@ -119,6 +121,19 @@
             <type>jar</type>
         </dependency>
 
+		<dependency>
+			<groupId>org.jboss.arquillian.extension</groupId>
+			<artifactId>arquillian-jacoco</artifactId>
+			<version>1.0.0.Alpha8</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jacoco</groupId>
+			<artifactId>org.jacoco.core</artifactId>
+			<version>${jacoco.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -232,6 +247,20 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -258,7 +287,7 @@
 				</dependency>
 			</dependencies>
 		</profile>
-        
+
         <profile>
             <id>payara</id>
 
@@ -269,7 +298,7 @@
 	               <version>${payara.version}</version>
 	               <scope>test</scope>
                 </dependency>
-                
+
                 <dependency>
                     <groupId>org.jboss.arquillian.container</groupId>
                     <artifactId>arquillian-glassfish-embedded-3.1</artifactId>
@@ -278,7 +307,7 @@
                 </dependency>
             </dependencies>
         </profile>
-        
+
         <profile>
             <id>wildfly</id>
 
@@ -290,7 +319,7 @@
                     <scope>test</scope>
                 </dependency>
             </dependencies>
-            
+
             <build>
                 <plugins>
                     <plugin>
@@ -334,11 +363,11 @@
                 </plugins>
             </build>
         </profile>
-        
-        
+
+
         <profile>
             <id>tomee</id>
-            
+
             <dependencies>
                 <dependency>
                     <groupId>org.apache.tomee</groupId>
@@ -348,7 +377,7 @@
                     <type>zip</type>
                     <classifier>plus</classifier>
                 </dependency>
-                
+
                 <dependency>
                     <groupId>org.apache.tomee</groupId>
                     <artifactId>arquillian-tomee-remote</artifactId>
@@ -362,7 +391,7 @@
                     </exclusions>
                 </dependency>
             </dependencies>
-            
+
             <build>
                 <plugins>
                     <plugin>
@@ -374,7 +403,7 @@
                                 <tomee.httpPort>-1</tomee.httpPort>
                                 <tomee.httpsPort>-1</tomee.httpsPort>
                                 <tomee.ajpPort>-1</tomee.ajpPort>
-                                
+
                                 <tomee.dir>target/tomee/server</tomee.dir>
                                 <tomee.appWorkingDir>target/tomee/arquillian</tomee.appWorkingDir>
                                 <tomee.cleanOnStartUp>true</tomee.cleanOnStartUp>
@@ -388,8 +417,8 @@
                 </plugins>
             </build>
         </profile>
-        
-        
+
+
         <profile>
             <id>liberty</id>
 
@@ -401,7 +430,7 @@
                     <scope>test</scope>
                 </dependency>
             </dependencies>
-            
+
             <build>
                 <plugins>
                     <plugin>
@@ -442,8 +471,8 @@
                                 <configuration>
                                     <tasks>
                                         <echo>Copying server.xml</echo>
-                                        <copy 
-                                            file="src/test/resources/server.xml" 
+                                        <copy
+                                            file="src/test/resources/server.xml"
                                             tofile="${project.build.directory}/wlp/templates/servers/defaultServer/server.xml"
                                         />
                                     </tasks>
