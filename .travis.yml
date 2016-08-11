@@ -8,3 +8,9 @@ env:
   - SERVER=tomee
   - SERVER=liberty
 script: mvn clean package -P $SERVER
+
+deploy:
+   provider: script
+   script: mvn deploy -Dmaven.test.skip -s settings.xml
+   on:
+      branch: develop
