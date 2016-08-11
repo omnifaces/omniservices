@@ -238,6 +238,7 @@
 						<exclude>src/main/resources/**</exclude>
 						<exclude>**/pom.xml</exclude>
 						<exclude>license-header-definition.xml</exclude>
+						<exclude>**/settings.xml</exclude>
 					</excludes>
 					<mapping>
 						<java>JAVA_STYLE</java>
