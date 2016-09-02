@@ -15,6 +15,7 @@
  */
 package org.omnifaces.services.pooled;
 
+import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -39,7 +40,7 @@ import javax.enterprise.context.NormalScope;
 @Inherited
 @NormalScope
 @Documented
-@Target(TYPE)
+@Target({TYPE, METHOD})
 @Retention(RUNTIME)
 public @interface Pooled {
 
