@@ -15,6 +15,8 @@
  */
 package org.omnifaces.services.pooled;
 
+import static org.omnifaces.utils.annotation.Annotations.createAnnotationInstance;
+
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -24,7 +26,6 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 
 import org.omnifaces.services.util.AnnotatedTypeWrapper;
-import org.omnifaces.utils.annotation.AnnotationUtils;
 
 public class PooledExtension implements Extension {
 
@@ -40,7 +41,7 @@ public class PooledExtension implements Extension {
 			AnnotatedType<T> annotatedType = processAnnotatedType.getAnnotatedType();
 			AnnotatedTypeWrapper<T> wrapper = new AnnotatedTypeWrapper<>(annotatedType);
 
-			wrapper.addAnnotation(AnnotationUtils.createAnnotationInstance(PooledScopeEnabled.class));
+			wrapper.addAnnotation(createAnnotationInstance(PooledScopeEnabled.class));
 
 			processAnnotatedType.setAnnotatedType(wrapper);
 		}
