@@ -1,5 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+>
 	<modelVersion>4.0.0</modelVersion>
 	<prerequisites>
 		<maven>3.0.0</maven>
@@ -11,33 +15,45 @@
 	<packaging>jar</packaging>
 
 	<name>OmniServices</name>
-    <url>http://omnifaces.org</url>
-
-    <description>
-        Utility library that provides EJB3-like features for CDI beans
-    </description>
-
-
+	<description>Utility library that provides EJB3-like features for CDI beans</description>
+	<url>https://github.com/omnifaces/omniservices</url>
 	<organization>
 		<name>OmniFaces</name>
-		<url>http://omnifaces.org</url>
+		<url>https://omnifaces.org</url>
 	</organization>
 	<inceptionYear>2016</inceptionYear>
+
+	<developers>
+		<developer>
+			<id>balusc</id>
+			<name>Bauke Scholtz</name>
+			<email>balusc@gmail.com</email>
+		</developer>
+		<developer>
+			<id>arjan.tijms</id>
+			<name>Arjan Tijms</name>
+			<email>arjan.tijms@gmail.com</email>
+		</developer>
+		<developer>
+			<id>jan.beernink</id>
+			<name>Jan Beernink</name>
+			<email>jan.beernink@gmail.com</email>
+		</developer>
+	</developers>
 
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
 
-	<repositories>
-		<repository>
-			<id>ossrh-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</repository>
-	</repositories>
+	<scm>
+		<url>https://github.com/omnifaces/omniservices</url>
+		<connection>scm:git:git://github.com/omnifaces/omniservices.git</connection>
+		<developerConnection>scm:git:git@github.com:omnifaces/omniservices.git</developerConnection>
+	</scm>
 
 	<distributionManagement>
 		<snapshotRepository>
@@ -46,21 +62,20 @@
 		</snapshotRepository>
 	</distributionManagement>
 
-	<scm>
-		<url>https://github.com/omnifaces/omniservices</url>
-		<connection>scm:git:git://github.com/omnifaces/omniservices.git</connection>
-		<developerConnection>scm:git:git@github.com:omnifaces/omniservices.git</developerConnection>
-	</scm>
-
 	<properties>
+
+		<!-- Minimum required Java versions. -->
+		<javase.version>1.8</javase.version>
+		<javaee.version>7</javaee.version>
+		
+		<!-- Essential Maven defaults. -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>${javase.version}</maven.compiler.source>
+		<maven.compiler.target>${javase.version}</maven.compiler.target>
 
+		<!-- Test versions. -->
 		<jacoco.version>0.7.4.201502262128</jacoco.version>
-
-        <!-- Test servers -->
         <glassfish.version>4.1.1</glassfish.version>
         <payara.version>4.1.1.162</payara.version>
         <wildfly.version>10.0.0.Final</wildfly.version>
@@ -68,73 +83,47 @@
         <liberty.version>16.0.0.2</liberty.version>
 	</properties>
 
-	<developers>
-		<developer>
-			<id>arjan.tijms</id>
-			<name>Arjan Tijms</name>
-			<email>arjan.tijms@gmail.com</email>
-		</developer>
-
-		<developer>
-			<id>janbeernink</id>
-			<name>Jan Beernink</name>
-			<email>jan.beernink@gmail.com</email>
-		</developer>
-	</developers>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.jboss.arquillian</groupId>
-				<artifactId>arquillian-bom</artifactId>
-				<version>1.1.10.Final</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<dependencies>
+
+		<!-- Java EE 7 full profile dependencies. -->
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
-			<version>7.0</version>
+			<version>${javaee.version}.0</version>
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- OmniFaces dependencies. -->
 		<dependency>
 			<groupId>org.omnifaces</groupId>
 			<artifactId>omniutils</artifactId>
-			<version>0.3</version>
+			<version>0.11</version>
 		</dependency>
 
+		<!-- Test dependencies.	-->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.13.1</version>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.jboss.arquillian.junit</groupId>
 			<artifactId>arquillian-junit-container</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-        <dependency>
-            <groupId>org.jboss.shrinkwrap.resolver</groupId>
-            <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
-            <scope>test</scope>
-            <type>jar</type>
-        </dependency>
-
+		<dependency>
+			<groupId>org.jboss.shrinkwrap.resolver</groupId>
+			<artifactId>shrinkwrap-resolver-depchain</artifactId>
+			<type>pom</type>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.jboss.arquillian.extension</groupId>
 			<artifactId>arquillian-jacoco</artifactId>
 			<version>1.0.0.Alpha8</version>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.jacoco</groupId>
 			<artifactId>org.jacoco.core</artifactId>
@@ -143,13 +132,59 @@
 		</dependency>
 	</dependencies>
 
+	<dependencyManagement>
+		<dependencies>
+
+			<!-- Test dependencies.	-->
+			<dependency>
+				<groupId>org.jboss.arquillian</groupId>
+				<artifactId>arquillian-bom</artifactId>
+				<version>1.6.0.Final</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.shrinkwrap.resolver</groupId>
+				<artifactId>shrinkwrap-resolver-bom</artifactId>
+				<version>3.1.4</version>
+				<type>pom</type>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<build>
 		<plugins>
-			<!-- Configure the jar with the binaries -->
+
+			<!-- Add missing license headers to source files. -->
+			<plugin>
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>3.0</version>
+				<configuration>
+					<header>license.txt</header>
+					<excludes>
+						<exclude>*.*</exclude>
+					</excludes>
+					<mapping>
+						<java>SLASHSTAR_STYLE</java>
+					</mapping>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>format</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Configure the jar with the binaries. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.5</version>
+				<version>3.2.0</version>
 				<configuration>
 					<archive>
 						<manifest>
@@ -164,11 +199,11 @@
 				</configuration>
 			</plugin>
 
-			<!-- Configure the jar with the sources (or rather, convince Maven that we want sources at all) -->
+			<!-- Configure the jar with the sources. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>2.4</version>
+				<version>3.2.1</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -179,16 +214,19 @@
 				</executions>
 			</plugin>
 
-			<!-- Configure the jar with the javadoc (or rather, convince Maven that we want javadoc at all) -->
+			<!-- Configure the jar with the javadoc. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.1</version>
+				<version>3.2.0</version>
 				<configuration>
-					<javadocVersion>1.8</javadocVersion>
+					<javadocVersion>${javase.version}</javadocVersion>
 					<notimestamp>true</notimestamp>
 					<splitindex>true</splitindex>
-					<doctitle>OmniUtils API documentation</doctitle>
+					<doctitle>OmniServices API documentation</doctitle>
+					<links>
+						<link>https://javaee.github.io/javaee-spec/javadocs/</link>
+					</links>
 				</configuration>
 				<executions>
 					<execution>
@@ -200,25 +238,11 @@
 				</executions>
 			</plugin>
 
-			<plugin>
-				<groupId>external.atlassian.jgitflow</groupId>
-				<artifactId>jgitflow-maven-plugin</artifactId>
-				<version>1.0-m5.1</version>
-				<configuration>
-					<noDeploy>true</noDeploy>
-					<enableFeatureVersions>true</enableFeatureVersions>
-				</configuration>
-			</plugin>
-
-			<!-- Deploying is done via sonatype's Nexus
-
-				 Snapshot deploy: mvn clean deploy
-				 Release deploy: mvn clean deploy -P release
-			-->
+			<!-- Configure snapshot deployment to Sonatype. -->
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.5</version>
+				<version>1.6.8</version>
 				<extensions>true</extensions>
 				<configuration>
 					<serverId>ossrh</serverId>
@@ -228,32 +252,13 @@
 			</plugin>
 
 			<plugin>
-				<groupId>com.mycila</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<version>2.11</version>
+				<groupId>external.atlassian.jgitflow</groupId>
+				<artifactId>jgitflow-maven-plugin</artifactId>
+				<version>1.0-m5.1</version>
 				<configuration>
-					<header>license-header.txt</header>
-					<excludes>
-						<exclude>src/test/resources/**</exclude>
-						<exclude>src/main/resources/**</exclude>
-						<exclude>**/pom.xml</exclude>
-						<exclude>license-header-definition.xml</exclude>
-						<exclude>**/settings.xml</exclude>
-					</excludes>
-					<mapping>
-						<java>JAVA_STYLE</java>
-					</mapping>
-					<headerDefinitions>
-						<headerDefinition>license-header-definition.xml</headerDefinition>
-					</headerDefinitions>
+					<noDeploy>true</noDeploy>
+					<enableFeatureVersions>true</enableFeatureVersions>
 				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 
 			<plugin>
@@ -270,6 +275,39 @@
 				</executions>
 			</plugin>
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+
+				<!-- Make sure Eclipse itself also runs license format during build. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.mycila</groupId>
+										<artifactId>license-maven-plugin</artifactId>
+										<versionRange>[3.0,)</versionRange>
+										<goals>
+											<goal>format</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute>
+											<runOnConfiguration>true</runOnConfiguration>
+										</execute>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 	<profiles>
