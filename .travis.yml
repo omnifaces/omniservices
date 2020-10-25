@@ -1,17 +1,25 @@
 language: java
 jdk:
-  - oraclejdk8
+   - openjdk8
+cache:
+   directories:
+      - "$HOME/.m2/repository"
+      - "$HOME/.sonar/cache"
+
+# Do integration test on configured servers.
 env:
   - SERVER=payara
   - SERVER=wildfly
   - SERVER=glassfish
   - SERVER=tomee
   - SERVER=liberty
-script: mvn clean package -P $SERVER
+script: mvn verify -Dmaven.javadoc.skip=true -P $SERVER
 
+# Do snapshot deployment.
 deploy:
    provider: script
    script: mvn deploy -Dmaven.test.skip -s settings.xml
+   skip_cleanup: true
    on:
       branch: develop
       condition: $SERVER = wildfly
