@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         server: [payara, wildfly, glassfish, tomee, liberty]
-        
+
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.8
@@ -20,7 +20,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Test with Maven
-      run: mvn verify -Dmaven.javadoc.skip=true -P $SERVER
+      run: mvn verify -Dmaven.javadoc.skip=true -P ${{ matrix.server }}
 
 #   build:
 
