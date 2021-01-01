@@ -22,11 +22,11 @@ class PooledScope {
 	private final Map<Contextual<?>, PoolKey<?>> allocatedPoolKeys = new HashMap<>();
 
 	public void setPoolKey(PoolKey<?> pookKey) {
-		allocatedPoolKeys.put(pookKey.getContextual(), pookKey);
+		allocatedPoolKeys.put(pookKey.contextual(), pookKey);
 	}
 
 	public void removePoolKey(PoolKey<?> poolKey) {
-		allocatedPoolKeys.remove(poolKey.getContextual());
+		allocatedPoolKeys.remove(poolKey.contextual());
 	}
 
 	@SuppressWarnings("unchecked")
