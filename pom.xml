@@ -63,11 +63,12 @@
 	</distributionManagement>
 
 	<properties>
+		<module.name>org.omnifaces.omniservices</module.name>
 
 		<!-- Minimum required Java versions. -->
 		<javase.version>1.8</javase.version>
 		<javaee.version>7</javaee.version>
-		
+
 		<!-- Essential Maven defaults. -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -194,6 +195,7 @@
 						<manifestEntries>
 							<URL>${project.url}</URL>
 							<Extension-Name>${project.artifactId}</Extension-Name>
+							<Automatic-Module-Name>${module.name}</Automatic-Module-Name>
 						</manifestEntries>
 					</archive>
 				</configuration>
