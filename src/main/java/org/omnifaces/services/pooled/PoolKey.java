@@ -26,11 +26,11 @@ final class PoolKey<T> {
 		this.index = index;
 	}
 
-	public Contextual<T> getContextual() {
+	Contextual<T> contextual() {
 		return contextual;
 	}
 
-	public int getIndex() {
+	int index() {
 		return index;
 	}
 

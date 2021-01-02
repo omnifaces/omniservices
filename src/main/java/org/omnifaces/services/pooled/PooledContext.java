@@ -49,7 +49,7 @@ public class PooledContext implements AlterableContext {
 				return (T) dummyInstances.computeIfAbsent(contextual, ctx -> contextual.create(creationalContext));
 			}
 
-			return ((InstancePool<T>) instancePools.get(poolKey.getContextual())).getInstance(poolKey, creationalContext);
+			return ((InstancePool<T>) instancePools.get(poolKey.contextual())).getInstance(poolKey, creationalContext);
 		}
 
 		// TODO add clear error message and pick better exception
@@ -66,7 +66,7 @@ public class PooledContext implements AlterableContext {
 				return (T) dummyInstances.get(contextual);
 			}
 
-			return ((InstancePool<T>) instancePools.get(poolKey.getContextual())).getInstance(poolKey);
+			return ((InstancePool<T>) instancePools.get(poolKey.contextual())).getInstance(poolKey);
 		}
 		return null;
 	}
@@ -89,7 +89,7 @@ public class PooledContext implements AlterableContext {
 	<T> void releaseBean(PoolKey<T> poolKey) {
 		poolScope.get().removePoolKey(poolKey);
 
-		((InstancePool<T>) instancePools.get(poolKey.getContextual())).releaseInstance(poolKey);
+		((InstancePool<T>) instancePools.get(poolKey.contextual())).releaseInstance(poolKey);
 	}
 
 	boolean hasAllocatedInstanceOf(Bean<?> bean) {
@@ -115,7 +115,7 @@ public class PooledContext implements AlterableContext {
 
 	private <T> void destroyInstance(PoolKey<T> poolKey) {
 		@SuppressWarnings("unchecked")
-		InstancePool<T> instancePool = (InstancePool<T>) instancePools.get(poolKey.getContextual());
+		InstancePool<T> instancePool = (InstancePool<T>) instancePools.get(poolKey.contextual());
 
 		instancePool.destroyInstance(poolKey);
 	}
@@ -138,7 +138,7 @@ public class PooledContext implements AlterableContext {
 		}
 
 		T getInstance(PoolKey<T> poolKey) {
-			if (!poolKey.getContextual().equals(contextual)) {
+			if (!poolKey.contextual().equals(contextual)) {
 				throw new IllegalArgumentException();
 			}
 
@@ -152,7 +152,7 @@ public class PooledContext implements AlterableContext {
 		}
 
 		T getInstance(PoolKey<T> poolKey, CreationalContext<T> context) {
-			if (!poolKey.getContextual().equals(contextual)) {
+			if (!poolKey.contextual().equals(contextual)) {
 				throw new IllegalArgumentException();
 			}
 
@@ -175,7 +175,7 @@ public class PooledContext implements AlterableContext {
 		}
 
 		void releaseInstance(PoolKey<T> key) {
-			if (!contextual.equals(key.getContextual())) {
+			if (!contextual.equals(key.contextual())) {
 				throw new IllegalArgumentException();
 			}
 
