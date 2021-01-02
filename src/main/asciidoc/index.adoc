@@ -1,0 +1,2 @@
+= OmniServices v{project-version}
+
