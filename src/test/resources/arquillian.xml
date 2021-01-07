@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2020 OmniFaces
+    Copyright 2021 OmniFaces
 
     Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
     the License. You may obtain a copy of the License at
@@ -13,7 +13,6 @@
     specific language governing permissions and limitations under the License.
 
 -->
-
 <arquillian xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://jboss.org/schema/arquillian" xsi:schemaLocation="http://jboss.org/schema/arquillian
     http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
 
