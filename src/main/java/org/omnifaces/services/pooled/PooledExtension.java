@@ -14,13 +14,13 @@ package org.omnifaces.services.pooled;
 
 import static org.omnifaces.utils.annotation.Annotations.createAnnotationInstance;
 
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessBean;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.AnnotatedType;
+import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
+import jakarta.enterprise.inject.spi.ProcessBean;
 
 import org.omnifaces.services.util.AnnotatedTypeWrapper;
 
@@ -33,10 +33,9 @@ public class PooledExtension implements Extension {
 	}
 
 	public <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> processAnnotatedType) {
-
 		if (processAnnotatedType.getAnnotatedType().isAnnotationPresent(Pooled.class)) {
 			AnnotatedType<T> annotatedType = processAnnotatedType.getAnnotatedType();
-			AnnotatedTypeWrapper<T> wrapper = new AnnotatedTypeWrapper<>(annotatedType);
+			AnnotatedTypeWrapper<T> wrapper = new AnnotatedTypeWrapper<T>(annotatedType);
 
 			wrapper.addAnnotation(createAnnotationInstance(PooledScopeEnabled.class));
 
