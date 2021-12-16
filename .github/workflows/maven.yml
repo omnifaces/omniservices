@@ -23,7 +23,8 @@ jobs:
       fail-fast: false
       matrix:
         jdk: [11, 17]
-        server: [payara5, wildfly, glassfish6, tomee9, liberty]
+        server: [wildfly, glassfish6, liberty]
+        # Temporarily disabled: payara5, tomee9
 
     steps:
     - uses: actions/checkout@v2
