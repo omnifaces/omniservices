@@ -12,19 +12,19 @@
  */
 package org.omnifaces.services.pooled;
 
-import static javax.interceptor.Interceptor.Priority.PLATFORM_BEFORE;
+import static jakarta.interceptor.Interceptor.Priority.PLATFORM_BEFORE;
 
 import java.lang.reflect.InvocationTargetException;
 
-import javax.annotation.Priority;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Intercepted;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InvocationContext;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.Intercepted;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptor;
+import jakarta.interceptor.InvocationContext;
 
 @Interceptor
 @Priority(PLATFORM_BEFORE)

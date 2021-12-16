@@ -14,7 +14,7 @@ package org.omnifaces.services.pooled;
 
 import java.util.Objects;
 
-import javax.enterprise.context.spi.Contextual;
+import jakarta.enterprise.context.spi.Contextual;
 
 final class PoolKey<T> {
 

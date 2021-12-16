@@ -12,16 +12,16 @@
  */
 package org.omnifaces.services.asynchronous;
 
-import static javax.interceptor.Interceptor.Priority.PLATFORM_BEFORE;
+import static jakarta.interceptor.Interceptor.Priority.PLATFORM_BEFORE;
 
 import java.io.Serializable;
 
-import javax.annotation.Priority;
-import javax.annotation.Resource;
-import javax.enterprise.concurrent.ManagedExecutorService;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InvocationContext;
+import jakarta.annotation.Priority;
+import jakarta.annotation.Resource;
+import jakarta.enterprise.concurrent.ManagedExecutorService;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptor;
+import jakarta.interceptor.InvocationContext;
 
 @Interceptor
 @Asynchronous
@@ -35,6 +35,6 @@ public class AsynchronousInterceptor implements Serializable {
 
     @AroundInvoke
     public Object submitAsync(InvocationContext ctx) throws Exception {
-        return new FutureDelegator(managedExecutorService.submit( ()-> { return ctx.proceed(); } ));
+        return new FutureDelegator(managedExecutorService.submit(ctx::proceed));
     }
 }
