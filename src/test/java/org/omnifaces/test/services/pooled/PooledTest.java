@@ -41,19 +41,19 @@ public class PooledTest {
 	@Deployment
 	public static Archive<?> createDeployment() {
 		return create(WebArchive.class)
-                 .addAsManifestResource(INSTANCE, "beans.xml")
-                 .addClasses(SingleInstancePooledBean.class)
-                 .addAsLibraries(create(JavaArchive.class)
-                         .addAsManifestResource(INSTANCE, "beans.xml")
-                         .addAsServiceProvider(Extension.class, PooledExtension.class)
-                         .addPackages(true, "org.omnifaces.services.pooled")
-                         .addPackages(true, "org.omnifaces.services.util")
-                         )
-                 .addAsLibraries(Maven.resolver()
-                         .loadPomFromFile("pom.xml")
-                         .resolve("org.omnifaces:omniutils")
-                         .withoutTransitivity()
-                         .asSingleFile());
+				.addAsManifestResource(INSTANCE, "beans.xml")
+				.addClasses(SingleInstancePooledBean.class)
+				.addAsLibraries(create(JavaArchive.class)
+						.addAsManifestResource(INSTANCE, "beans.xml")
+						.addAsServiceProvider(Extension.class, PooledExtension.class)
+						.addPackages(true, "org.omnifaces.services.pooled")
+						.addPackages(true, "org.omnifaces.services.util")
+				)
+				.addAsLibraries(Maven.resolver()
+				                     .loadPomFromFile("pom.xml")
+				                     .resolve("org.omnifaces:omniutils")
+				                     .withoutTransitivity()
+				                     .asSingleFile());
 	}
 
 	@Inject
@@ -68,7 +68,8 @@ public class PooledTest {
 	}
 
 	@Test
-	@DisplayName("with an invocation that throws an exception not in the destroyOn field does not destroy the instance.")
+	@DisplayName(
+			"with an invocation that throws an exception not in the destroyOn field does not destroy the instance.")
 	public void bean_withInvocationThrowingANonDestroyingException_doesNotDestroyInstance() {
 		int identityHashCode = singleInstancePooledBean.getIdentityHashCode();
 
@@ -78,18 +79,21 @@ public class PooledTest {
 	}
 
 	@Test
-	@DisplayName("with an invocation that throws an exception explicitly listed in the dontDestroyOn field does not destroy the instance.")
+	@DisplayName(
+			"with an invocation that throws an exception explicitly listed in the dontDestroyOn field does not destroy the instance.")
 	public void bean_withInvocationThrowingAnExplicitNonDestroyingException_doesNotDestroyInstance() {
 		int identityHashCode = singleInstancePooledBean.getIdentityHashCode();
 
-		assertThrows(IllegalArgumentException.class, () -> singleInstancePooledBean.throwException(IllegalArgumentException::new));
+		assertThrows(IllegalArgumentException.class,
+				() -> singleInstancePooledBean.throwException(IllegalArgumentException::new));
 
 		assertEquals(identityHashCode, singleInstancePooledBean.getIdentityHashCode());
 	}
 
 
 	@Test
-	@DisplayName("with an invocation that throws an exception explicitly listed in the destroyOn field destroys the instance.")
+	@DisplayName(
+			"with an invocation that throws an exception explicitly listed in the destroyOn field destroys the instance.")
 	public void bean_withInvocationThrowingAnExplicitDestroyingException_destroysInstance() {
 		int identityHashCode = singleInstancePooledBean.getIdentityHashCode();
 
