@@ -71,6 +71,8 @@
 
         <!-- Test versions. -->
         <jacoco.version>0.8.7</jacoco.version>
+        
+        <piranha.version>21.12.0</piranha.version>
         <glassfish6.version>6.2.3</glassfish6.version>
         <payara5.version>5.2021.9</payara5.version>
         <wildfly.version>25.0.1.Final</wildfly.version>
@@ -334,10 +336,23 @@
 
     <profiles>
         <profile>
-            <id>glassfish6</id>
-            <activation>
+            <id>piranha-micro</id>
+             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+    
+            <dependencies>
+                <dependency>
+                    <groupId>cloud.piranha.arquillian</groupId>
+                    <artifactId>piranha-arquillian-server</artifactId>
+                    <version>${piranha.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    
+        <profile>
+            <id>glassfish6</id>
 
             <dependencies>
                 <dependency>
