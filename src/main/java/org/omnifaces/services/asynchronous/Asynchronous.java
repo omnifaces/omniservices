@@ -20,6 +20,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.interceptor.InterceptorBinding;
 
 @InterceptorBinding
@@ -27,4 +28,18 @@ import jakarta.interceptor.InterceptorBinding;
 @Retention(RUNTIME)
 @Inherited
 public @interface Asynchronous {
+    
+    /**
+     * Supports inline instantiation of the {@link Asynchronous} annotation.
+     *
+     */
+    public static final class Literal extends AnnotationLiteral<Asynchronous> implements Asynchronous {
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * Instance of the {@link Asynchronous} annotation.
+         */
+        public static final Literal INSTANCE = new Literal();
+    }
+    
 }
