@@ -17,8 +17,7 @@ import static jakarta.interceptor.Interceptor.Priority.PLATFORM_BEFORE;
 import java.io.Serializable;
 
 import jakarta.annotation.Priority;
-import jakarta.annotation.Resource;
-import jakarta.enterprise.concurrent.ManagedExecutorService;
+import jakarta.inject.Inject;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
@@ -29,12 +28,13 @@ import jakarta.interceptor.InvocationContext;
 public class AsynchronousInterceptor implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    @Resource
-    private ManagedExecutorService managedExecutorService;
+    
+    @Inject
+    private ExecutorBean executorBean;
 
     @AroundInvoke
     public Object submitAsync(InvocationContext ctx) throws Exception {
-        return new FutureDelegator(managedExecutorService.submit(ctx::proceed));
+        return new FutureDelegator(executorBean.getExecutorService().submit(ctx::proceed));
     }
+
 }

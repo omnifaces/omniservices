@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.enterprise.context.NormalScope;
+import jakarta.enterprise.util.AnnotationLiteral;
 
 /**
  * Specify that a bean is to be pooled.
@@ -81,5 +82,104 @@ public @interface Pooled {
 	 * @return The types of {@link Throwable Throwables} which must not cause the destruction of a pooled bean instance.
 	 */
 	Class[] dontDestroyOn() default {};
+	
+	/**
+     * Supports inline instantiation of the Pooled annotation.
+     *
+     * @since 3.0
+     */
+    public static final class Literal extends AnnotationLiteral<Pooled> implements Pooled {
 
+        private static final long serialVersionUID = 1L;
+
+        private final int       maxNumberOfInstances;
+        private final long      instanceLockTimeout;
+        private final TimeUnit  instanceLockTimeoutUnit;
+        private final Class[]   destroyOn;
+        private final Class[]   dontDestroyOn;
+
+        /**
+         * Default instance of the {@link Pooled} annotation.
+         */
+        public static final Literal INSTANCE = of(
+            10,
+            5,
+            MINUTES,
+            new Class[]{},
+            new Class[]{}
+        );
+
+        /**
+         * Instance of the {@link Pooled} annotation.
+         *
+         * @param maxNumberOfInstances The maximum number of instances in the pool.
+         * @param instanceLockTimeout The maximum amount of time to attempt to obtain a lock on an instance from the pool.
+         * @param instanceLockTimeoutUnit The {@link TimeUnit} to use for the {@link #instanceLockTimeout()}
+         * @param destroyOn The types of {@link Throwable Throwables} which must cause the destruction of a pooled bean instance.
+         * @param dontDestroyOn The types of {@link Throwable Throwables} which must not cause the destruction of a pooled bean instance.
+        
+         * @return instance of the {@link Pooled} annotation
+         */
+        public static Literal of(
+                        final int           maxNumberOfInstances,
+                        final long          instanceLockTimeout,
+                        final TimeUnit      instanceLockTimeoutUnit,
+                        final Class[]       destroyOn,
+                        final Class[]       dontDestroyOn
+
+
+            ) {
+            return new Literal(
+                                            maxNumberOfInstances,
+                                            instanceLockTimeout,
+                                            instanceLockTimeoutUnit,
+                                            destroyOn,
+                                            dontDestroyOn
+                );
+        }
+
+        private Literal(
+                        final int           maxNumberOfInstances,
+                        final long          instanceLockTimeout,
+                        final TimeUnit      instanceLockTimeoutUnit,
+                        final Class[]       destroyOn,
+                        final Class[]       dontDestroyOn
+                ) {
+
+            this.maxNumberOfInstances =     maxNumberOfInstances;
+            this.instanceLockTimeout =      instanceLockTimeout;
+            this.instanceLockTimeoutUnit =  instanceLockTimeoutUnit;
+            this.destroyOn =                destroyOn;
+            this.dontDestroyOn =            dontDestroyOn;
+        }
+        
+        
+        @Override
+        public int maxNumberOfInstances() {
+            return maxNumberOfInstances;
+        }
+
+        @Override
+        public long instanceLockTimeout() {
+            return instanceLockTimeout;
+        }
+
+        @Override
+        public TimeUnit instanceLockTimeoutUnit() {
+            return instanceLockTimeoutUnit;
+        }
+
+        @Override
+        public Class[] destroyOn() {
+            return destroyOn;
+        }
+
+        @Override
+        public Class[] dontDestroyOn() {
+            return dontDestroyOn;
+        }
+       
+    }
 }
+
+

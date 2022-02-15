@@ -21,6 +21,9 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.omnifaces.services.asynchronous.Asynchronous;
+
+import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.interceptor.InterceptorBinding;
 
 @InterceptorBinding
@@ -29,4 +32,17 @@ import jakarta.interceptor.InterceptorBinding;
 @Retention(RUNTIME)
 @Target({TYPE, METHOD})
 public @interface PooledScopeEnabled {
+    
+    /**
+     * Supports inline instantiation of the {@link PooledScopeEnabled} annotation.
+     *
+     */
+    public static final class Literal extends AnnotationLiteral<PooledScopeEnabled> implements PooledScopeEnabled {
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * Instance of the {@link Asynchronous} annotation.
+         */
+        public static final Literal INSTANCE = new Literal();
+    }
 }
