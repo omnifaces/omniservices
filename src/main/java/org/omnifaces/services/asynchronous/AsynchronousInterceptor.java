@@ -24,7 +24,7 @@ import jakarta.interceptor.InvocationContext;
 
 @Interceptor
 @Asynchronous
-@Priority(PLATFORM_BEFORE)
+@Priority(PLATFORM_BEFORE + 1)
 public class AsynchronousInterceptor implements Serializable {
 
     private static final long serialVersionUID = 1L;
