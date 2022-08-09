@@ -4,7 +4,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.omnifaces</groupId>
     <artifactId>omniservices</artifactId>
@@ -263,6 +263,29 @@
                 </configuration>
             </plugin>
 
+            <!-- Generate documentation from source. -->
+            <plugin>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>1.5.6</version>
+                <configuration>
+                    <attributes>
+                        <project-version>${project.version}</project-version>
+                        <linkcss>true</linkcss>
+                    </attributes>
+                    <backend>html5</backend>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>output-html</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>external.atlassian.jgitflow</groupId>
                 <artifactId>jgitflow-maven-plugin</artifactId>
@@ -386,6 +409,7 @@
                     <groupId>fish.payara.arquillian</groupId>
                     <artifactId>arquillian-payara-server-embedded</artifactId>
                     <version>2.4.5</version>
+
                 </dependency>
             </dependencies>
         </profile>
@@ -439,7 +463,8 @@
                             </systemPropertyVariables>
                             <environmentVariables>
                                 <JBOSS_HOME>${project.build.directory}/wildfly-preview-${wildfly.version}</JBOSS_HOME>
-                                <module.path>${project.build.directory}/wildfly-preview-${wildfly.version}/modules</module.path>
+                                <module.path>${project.build.directory}/wildfly-preview-${wildfly.version}/modules
+                                </module.path>
                             </environmentVariables>
                         </configuration>
                     </plugin>
