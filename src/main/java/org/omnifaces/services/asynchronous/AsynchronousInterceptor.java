@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 OmniFaces
+ * Copyright 2021, 2022 OmniFaces
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -17,7 +17,9 @@ import static jakarta.interceptor.Interceptor.Priority.PLATFORM_BEFORE;
 import java.io.Serializable;
 
 import jakarta.annotation.Priority;
+import jakarta.enterprise.context.control.RequestContextController;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
@@ -28,13 +30,24 @@ import jakarta.interceptor.InvocationContext;
 public class AsynchronousInterceptor implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Inject
     private ExecutorBean executorBean;
 
+    @Inject
+    private Provider<RequestContextController> requestContextControllerProvider;
+
     @AroundInvoke
     public Object submitAsync(InvocationContext ctx) throws Exception {
-        return new FutureDelegator(executorBean.getExecutorService().submit(ctx::proceed));
+        return new FutureDelegator(executorBean.getExecutorService().submit(() -> {
+            RequestContextController requestContextController = requestContextControllerProvider.get();
+            requestContextController.activate();
+            try {
+                return ctx.proceed();
+            } finally {
+                requestContextController.deactivate();
+            }
+        }));
     }
 
 }
