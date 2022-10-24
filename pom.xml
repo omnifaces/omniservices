@@ -60,10 +60,7 @@
     </distributionManagement>
 
     <properties>
-        <module.name>org.omnifaces.omniservices</module.name>
-
         <maven.compiler.release>11</maven.compiler.release>
-        <jakartaee.version>9.1.0</jakartaee.version>
 
         <!-- Essential Maven defaults. -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
