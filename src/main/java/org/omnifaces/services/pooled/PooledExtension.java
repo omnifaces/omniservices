@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 OmniFaces
+ * Copyright 2021, 2022 OmniFaces
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -14,21 +14,30 @@ package org.omnifaces.services.pooled;
 
 import static org.omnifaces.utils.annotation.Annotations.createAnnotationInstance;
 
+import org.omnifaces.services.asynchronous.AsynchronousInterceptor;
+import org.omnifaces.services.asynchronous.ExecutorBean;
+import org.omnifaces.services.util.AnnotatedTypeWrapper;
+
+import jakarta.ejb.Asynchronous;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
 import jakarta.enterprise.inject.spi.AnnotatedType;
+import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
 import jakarta.enterprise.inject.spi.Extension;
 import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
 import jakarta.enterprise.inject.spi.ProcessBean;
 
-import org.omnifaces.services.util.AnnotatedTypeWrapper;
-
 public class PooledExtension implements Extension {
 
 	private final PooledContext pooledContext = new PooledContext();
 
-	public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery beforeBeanDiscovery) {
+	public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery beforeBeanDiscovery, BeanManager beanManager) {
+	    addAnnotatedTypes(beforeBeanDiscovery, beanManager,
+            Asynchronous.class,
+            AsynchronousInterceptor.class,
+            ExecutorBean.class);
+
 		beforeBeanDiscovery.addScope(Pooled.class, true, false);
 	}
 
@@ -55,4 +64,10 @@ public class PooledExtension implements Extension {
 	public void afterBeanDiscovery(@Observes AfterBeanDiscovery afterBeanDiscovery) {
 		afterBeanDiscovery.addContext(pooledContext);
 	}
+
+	 public static void addAnnotatedTypes(BeforeBeanDiscovery beforeBean, BeanManager beanManager, Class<?>... types) {
+	        for (Class<?> type : types) {
+	            beforeBean.addAnnotatedType(beanManager.createAnnotatedType(type), "Omniservices " + type.getName());
+	        }
+	    }
 }
