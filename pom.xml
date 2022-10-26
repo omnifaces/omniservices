@@ -8,7 +8,7 @@
 
     <groupId>org.omnifaces</groupId>
     <artifactId>omniservices</artifactId>
-    <version>0.2</version>
+    <version>0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>OmniServices</name>
