@@ -12,25 +12,16 @@
  */
 package org.omnifaces.test.services.pooled;
 
-import static org.jboss.shrinkwrap.api.ShrinkWrap.create;
-import static org.jboss.shrinkwrap.api.asset.EmptyAsset.INSTANCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit5.ArquillianExtension;
-import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.omnifaces.services.pooled.PooledExtension;
 
-import jakarta.enterprise.inject.spi.Extension;
 import jakarta.inject.Inject;
 
 @ExtendWith(ArquillianExtension.class)
@@ -38,23 +29,23 @@ import jakarta.inject.Inject;
 @Disabled("Complains about DependencyInjectionArquillianExtension and unnamed module")
 public class PooledTest {
 
-	@Deployment
-	public static Archive<?> createDeployment() {
-		return create(WebArchive.class)
-				.addAsManifestResource(INSTANCE, "beans.xml")
-				.addClasses(SingleInstancePooledBean.class)
-				.addAsLibraries(create(JavaArchive.class)
-						.addAsManifestResource(INSTANCE, "beans.xml")
-						.addAsServiceProvider(Extension.class, PooledExtension.class)
-						.addPackages(true, "org.omnifaces.services.pooled")
-						.addPackages(true, "org.omnifaces.services.util")
-				)
-				.addAsLibraries(Maven.resolver()
-				                     .loadPomFromFile("pom.xml")
-				                     .resolve("org.omnifaces:omniutils")
-				                     .withoutTransitivity()
-				                     .asSingleFile());
-	}
+//	@Deployment
+//	public static Archive<?> createDeployment() {
+//		return create(WebArchive.class)
+//				.addAsManifestResource(INSTANCE, "beans.xml")
+//				.addClasses(SingleInstancePooledBean.class)
+//				.addAsLibraries(create(JavaArchive.class)
+//						.addAsManifestResource(INSTANCE, "beans.xml")
+//						.addAsServiceProvider(Extension.class, PooledExtension.class)
+//						.addPackages(true, "org.omnifaces.services.pooled")
+//						.addPackages(true, "org.omnifaces.services.util")
+//				)
+//				.addAsLibraries(Maven.resolver()
+//				                     .loadPomFromFile("pom.xml")
+//				                     .resolve("org.omnifaces:omniutils")
+//				                     .withoutTransitivity()
+//				                     .asSingleFile());
+//	}
 
 	@Inject
 	private SingleInstancePooledBean singleInstancePooledBean;
