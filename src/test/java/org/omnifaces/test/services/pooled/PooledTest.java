@@ -36,7 +36,7 @@ public class PooledTest {
 //				.addClasses(SingleInstancePooledBean.class)
 //				.addAsLibraries(create(JavaArchive.class)
 //						.addAsManifestResource(INSTANCE, "beans.xml")
-//						.addAsServiceProvider(Extension.class, PooledExtension.class)
+//						.addAsServiceProvider(Extension.class, CdiExtension.class)
 //						.addPackages(true, "org.omnifaces.services.pooled")
 //						.addPackages(true, "org.omnifaces.services.util")
 //				)

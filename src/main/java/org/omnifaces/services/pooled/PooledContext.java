@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 OmniFaces
+ * Copyright 2021, 2023 OmniFaces
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -96,7 +96,7 @@ public class PooledContext implements AlterableContext {
 		return poolScope.get().getPoolKey(bean) != null;
 	}
 
-	<T> void createInstancePool(Contextual<T> contextual, Pooled poolSettings) {
+	public <T> void createInstancePool(Contextual<T> contextual, Pooled poolSettings) {
 		instancePools.put(contextual, new InstancePool<>(contextual, poolSettings));
 	}
 

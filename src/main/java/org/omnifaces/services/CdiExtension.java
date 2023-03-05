@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 OmniFaces
+ * Copyright 2021, 2023 OmniFaces
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -10,12 +10,17 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.omnifaces.services.pooled;
+package org.omnifaces.services;
 
 import static org.omnifaces.utils.annotation.Annotations.createAnnotationInstance;
 
 import org.omnifaces.services.asynchronous.AsynchronousInterceptor;
 import org.omnifaces.services.asynchronous.ExecutorBean;
+import org.omnifaces.services.lock.Lock;
+import org.omnifaces.services.lock.LockInterceptor;
+import org.omnifaces.services.pooled.Pooled;
+import org.omnifaces.services.pooled.PooledContext;
+import org.omnifaces.services.pooled.PooledScopeEnabled;
 import org.omnifaces.services.util.AnnotatedTypeWrapper;
 
 import jakarta.ejb.Asynchronous;
@@ -28,7 +33,7 @@ import jakarta.enterprise.inject.spi.Extension;
 import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
 import jakarta.enterprise.inject.spi.ProcessBean;
 
-public class PooledExtension implements Extension {
+public class CdiExtension implements Extension {
 
 	private final PooledContext pooledContext = new PooledContext();
 
@@ -36,9 +41,14 @@ public class PooledExtension implements Extension {
 	    addAnnotatedTypes(beforeBeanDiscovery, beanManager,
             Asynchronous.class,
             AsynchronousInterceptor.class,
+
+            Lock.class,
+            LockInterceptor.class,
+
             ExecutorBean.class);
 
-		beforeBeanDiscovery.addScope(Pooled.class, true, false);
+		beforeBeanDiscovery.addScope(
+	        Pooled.class, true, false);
 	}
 
 	public <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> processAnnotatedType) {

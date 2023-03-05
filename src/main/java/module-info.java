@@ -1,9 +1,9 @@
-import org.omnifaces.services.pooled.PooledExtension;
+import org.omnifaces.services.CdiExtension;
 
 import jakarta.enterprise.inject.spi.Extension;
 
 /*
- * Copyright 2021 OmniFaces
+ * Copyright 2021, 2023 OmniFaces
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@ import jakarta.enterprise.inject.spi.Extension;
  */
 module org.omnifaces.services {
 
-    provides Extension with PooledExtension;
+    provides Extension with CdiExtension;
 
     exports org.omnifaces.services;
     opens org.omnifaces.services;
@@ -29,6 +29,9 @@ module org.omnifaces.services {
 
     exports org.omnifaces.services.pooled;
     opens org.omnifaces.services.pooled;
+
+    exports org.omnifaces.services.lock;
+    opens org.omnifaces.services.lock;
 
     exports org.omnifaces.services.util;
     opens org.omnifaces.services.util;
