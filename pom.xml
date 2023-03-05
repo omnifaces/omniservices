@@ -8,7 +8,7 @@
 
     <groupId>org.omnifaces</groupId>
     <artifactId>omniservices</artifactId>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.4</version>
     <packaging>jar</packaging>
 
     <name>OmniServices</name>
@@ -252,19 +252,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-
-            <!-- Configure snapshot deployment to Sonatype. -->
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
             </plugin>
 
             <plugin>
