@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+>
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>org.omnifaces</groupId>
+        <artifactId>omniservices-parent</artifactId>
+        <version>0.5-SNAPSHOT</version>
+    </parent>
+
+    <!--
+        Tests OmniServices in an application deployed to Quarkus (profile quarkus, the default) or to Piranha Micro
+        (profile piranha). Both load OmniServices from the local Maven repository, so run "mvn install" from the
+        project root.
+    -->
+    <artifactId>omniservices-test</artifactId>
+    <packaging>jar</packaging>
+
+    <name>OmniServices Tests</name>
+
+    <properties>
+        <!-- The tests aren't published -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+
+        <arquillian-quarkus.version>1.1.1</arquillian-quarkus.version>
+        <piranha.version>25.4.0-SNAPSHOT</piranha.version>
+
+        <!-- Where the application records its shutdown, for ShutdownTest -->
+        <omniservices.test.events>${project.build.directory}/shutdown-events.txt</omniservices.test.events>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.arquillian</groupId>
+                <artifactId>arquillian-bom</artifactId>
+                <version>1.10.0.Final</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.11.4</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+            <version>11.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.omnifaces</groupId>
+            <artifactId>omniservices</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.arquillian.junit5</groupId>
+            <artifactId>arquillian-junit5-container</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <!-- PlainTest runs in an execution of its own, in the quarkus profile -->
+                    <execution>
+                        <id>default-test</id>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/PlainTest.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <systemPropertyVariables>
+                        <omniservices.test.events>${omniservices.test.events}</omniservices.test.events>
+                        <!-- Short, so ShutdownTest sees what happens when it passes -->
+                        <org.omnifaces.services.shutdown.timeout>2</org.omnifaces.services.shutdown.timeout>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>quarkus</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>ee.omnifish.arquillian</groupId>
+                    <artifactId>arquillian-quarkus-managed</artifactId>
+                    <version>${arquillian-quarkus.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <arquillian.quarkus.dependencies>
+                                    io.quarkus:quarkus-undertow,
+                                    io.quarkus:quarkus-narayana-jta,
+                                    io.quarkus:quarkus-smallrye-context-propagation,
+                                    org.omnifaces:omniservices:${project.version}
+                                </arquillian.quarkus.dependencies>
+                                <arquillian.quarkus.systemProperties>
+                                    omniservices.test.expectedExecutor=ManagedExecutor
+                                    omniservices.test.events=${omniservices.test.events}
+                                    org.omnifaces.services.shutdown.timeout=2
+                                    quarkus.log.file.enabled=true
+                                    quarkus.log.file.path=${project.build.directory}/quarkus-app.log
+                                </arquillian.quarkus.systemProperties>
+                                <omniservices.test.preDestroyAcquisition>accepted</omniservices.test.preDestroyAcquisition>
+                            </systemPropertyVariables>
+                        </configuration>
+                        <executions>
+                            <!-- OmniServices without a Jakarta Transactions implementation -->
+                            <execution>
+                                <id>without-transactions</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>**/PlainTest.java</include>
+                                    </includes>
+                                    <systemPropertyVariables>
+                                        <arquillian.quarkus.dependencies>
+                                            io.quarkus:quarkus-undertow,
+                                            io.quarkus:quarkus-smallrye-context-propagation,
+                                            org.omnifaces:omniservices:${project.version}
+                                        </arquillian.quarkus.dependencies>
+                                    </systemPropertyVariables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!--
+            Piranha Micro, in process. Until they're upstream, this needs a local Piranha build with two fixes (branch
+            weld-early-start): starting Weld before the other initializers, without which @Transactional doesn't work, and
+            destroying the web application when Micro stops, without which ShutdownTest fails.
+        -->
+        <profile>
+            <id>piranha</id>
+            <dependencies>
+                <dependency>
+                    <groupId>cloud.piranha.arquillian</groupId>
+                    <artifactId>piranha-arquillian-server</artifactId>
+                    <version>${piranha.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.shrinkwrap.resolver</groupId>
+                    <artifactId>shrinkwrap-resolver-depchain</artifactId>
+                    <version>3.3.3</version>
+                    <type>pom</type>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <piranha.offline>true</piranha.offline>
+                                <piranha.rootIsWarName>true</piranha.rootIsWarName>
+                                <!-- Replaces the OmniServices version that Micro comes with -->
+                                <piranha.dependencies>org.omnifaces:omniservices:${project.version}</piranha.dependencies>
+                                <omniservices.test.expectedExecutor>ThreadPoolExecutor</omniservices.test.expectedExecutor>
+                                <omniservices.test.preDestroyAcquisition>rejected</omniservices.test.preDestroyAcquisition>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

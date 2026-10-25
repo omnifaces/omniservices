@@ -17,20 +17,20 @@ on: [push, pull_request]
 
 jobs:
   test:
-    name: Run tests against ${{ matrix.server }} on JDK ${{ matrix.jdk }}
+    name: Run tests on Quarkus on JDK ${{ matrix.jdk }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        jdk: [11, 17]
-        server: [wildfly, glassfish6, liberty]
-        # Temporarily disabled: payara5, tomee9
+        jdk: [17, 21]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up JDK ${{ matrix.jdk }}
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v4
       with:
+        distribution: temurin
         java-version: ${{ matrix.jdk }}
+    # install, not verify: the tests load OmniServices from the local Maven repository
     - name: Test with Maven
-      run: mvn verify -Dmaven.javadoc.skip=true -P ${{ matrix.server }}
+      run: mvn --batch-mode install -Dmaven.javadoc.skip=true
