@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.omnifaces</groupId>
         <artifactId>omniservices-parent</artifactId>
-        <version>0.5</version>
+        <version>0.6-SNAPSHOT</version>
     </parent>
 
     <artifactId>omniservices</artifactId>
