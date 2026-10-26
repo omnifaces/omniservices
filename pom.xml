@@ -14,7 +14,7 @@
     -->
     <groupId>org.omnifaces</groupId>
     <artifactId>omniservices-parent</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5</version>
     <packaging>pom</packaging>
 
     <name>OmniServices Parent</name>
